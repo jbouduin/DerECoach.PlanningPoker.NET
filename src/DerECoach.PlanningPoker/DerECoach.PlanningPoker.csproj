@@ -19,21 +19,40 @@
 
   <ItemGroup>
     <!-- Don't publish the SPA source files, but do show them in the project files list -->
+    <Compile Remove="ClientApp\src\app\counter\**" />
+    <Compile Remove="ClientApp\src\app\fetch-data\**" />
     <Content Remove="$(SpaRoot)**" />
+    <Content Remove="ClientApp\src\app\counter\**" />
+    <Content Remove="ClientApp\src\app\fetch-data\**" />
     <None Include="$(SpaRoot)**" Exclude="$(SpaRoot)node_modules\**" />
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Remove="ClientApp\src\app\counter\**" />
+    <EmbeddedResource Remove="ClientApp\src\app\fetch-data\**" />
+    <None Remove="ClientApp\src\app\counter\**" />
+    <None Remove="ClientApp\src\app\fetch-data\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="ClientApp\src\app\core\create-request.ts" />
     <None Remove="ClientApp\src\app\core\game-participant.ts" />
     <None Remove="ClientApp\src\app\core\game.ts" />
     <None Remove="ClientApp\src\app\core\join-request.ts" />
+    <None Remove="ClientApp\src\app\core\services\game.service.ts" />
+    <None Remove="ClientApp\src\app\game\playfield.component.ts" />
+    <None Remove="ClientApp\src\app\home\create.component.ts" />
     <None Remove="ClientApp\src\app\home\join.component.ts" />
   </ItemGroup>
 
   <ItemGroup>
-    <TypeScriptCompile Include="ClientApp\src\app\core\join-request.ts" />
-    <TypeScriptCompile Include="ClientApp\src\app\core\game.ts" />
-    <TypeScriptCompile Include="ClientApp\src\app\core\game-participant.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\core\requests\create-request.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\core\requests\join-request.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\core\domain\game.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\core\domain\participant.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\core\services\game.service.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\game\playfield.component.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\home\create.component.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\home\join.component.ts" />
   </ItemGroup>
 

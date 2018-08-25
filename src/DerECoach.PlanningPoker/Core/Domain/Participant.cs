@@ -1,7 +1,7 @@
 ﻿
-namespace DerECoach.PlanningPoker.Data
+namespace DerECoach.PlanningPoker.Core.Domain
 {
-    public class GameParticipant
+    public class Participant
     {
         #region private fields ------------------------------------------------
         private string _lastEstimation;
@@ -13,9 +13,9 @@ namespace DerECoach.PlanningPoker.Data
         #endregion
 
         #region factory methods -----------------------------------------------
-        public static GameParticipant CreateParticipant(string screenName)
+        public static Participant CreateParticipant(string screenName)
         {
-            GameParticipant result = new GameParticipant();
+            Participant result = new Participant();
             result.ScreenName = screenName;
 
             return result;

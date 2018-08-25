@@ -1,4 +1,4 @@
-export class GameParticipant {
+export class Participant {
   ScreenName: string;
   LastEstimation: string;
 }

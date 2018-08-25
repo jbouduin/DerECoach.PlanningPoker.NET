@@ -1,6 +1,6 @@
-<form class="form-horizontal col-md-12" #joinForm="ngForm" id="joinForm">
+<form class="form-horizontal col-md-12" #createForm="ngForm" id="createForm">
   <div class="panel-heading">
-    <h3 class="panel-title">Join team</h3>
+    <h3 class="panel-title">Create team</h3>
   </div>
   <div class="panel-body">
     <div class="form-group" *ngIf="_errorText">
@@ -17,17 +17,17 @@
       </div>
     </div>
     <div class="form-group">
-      <label for="screenName" class="col-sm-3 control-label">{{_screenNameLabel}}:</label>
+      <label for="scrumMaster" class="col-sm-3 control-label">{{_scrumMasterLabel}}:</label>
       <div class="col-sm-9 full-column">
-        <input type="text" class="form-control" placeholder="Your name" [(ngModel)]="_request.ScreenName"
-               name="screenName" id="screenName" #screenName="ngModel" required />
-        <div [hidden]="screenName.valid || screenName.untouched" class="text-danger">
-          Screen name is mandatory
+        <input type="text" class="form-control" placeholder="Your name" [(ngModel)]="_request.ScrumMaster"
+               name="scrumMaster" id="scrumMaster" #scrumMaster="ngModel" required />
+        <div [hidden]="scrumMaster.valid || scrumMaster.untouched" class="text-danger">
+          Scrum Master is mandatory
         </div>
       </div>
     </div>
     <div class="form-group button-row">      
-      <button class="btn btn-default fr" [disabled]="!joinForm.form.valid" (click)="joinTeam()">{{_sendButtonCaption}}</button>
+      <button class="btn btn-default fr" [disabled]="!createForm.form.valid" (click)="createTeam()">{{_sendButtonCaption}}</button>
     </div>
   </div>
 

@@ -1,17 +1,17 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace DerECoach.PlanningPoker.Data
+namespace DerECoach.PlanningPoker.Core.Domain
 {
     public class Game
     {
         #region public properties ---------------------------------------------
         public string ScreenName { get; private set; }
-        public IList<GameParticipant> AllParticipants { get; } = new List<GameParticipant>();
+        public IList<Participant> AllParticipants { get; } = new List<Participant>();
         #endregion
 
         #region public methods ------------------------------------------------
-        public void AddParticipant(GameParticipant newParticipant)
+        public void AddParticipant(Participant newParticipant)
         {
             if (AllParticipants.Any(a => a.ScreenName.ToLower().Equals(newParticipant.ScreenName.ToLower())))
                 return;

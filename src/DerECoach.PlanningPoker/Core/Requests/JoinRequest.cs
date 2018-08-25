@@ -1,5 +1,5 @@
 ﻿
-namespace DerECoach.PlanningPoker.Data
+namespace DerECoach.PlanningPoker.Core.Requests
 {
     public class JoinRequest
     {

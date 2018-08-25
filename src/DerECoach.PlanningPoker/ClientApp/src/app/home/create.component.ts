@@ -1,34 +1,34 @@
 import { Component, Inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { JoinRequest } from '../core/requests/join-request';
+import { CreateRequest } from '../core/requests/create-request';
 
 
 @Component({
-  selector: 'join-component',
-  templateUrl: './join.component.html'
+  selector: 'create-component',
+  templateUrl: './create.component.html'
 })
 
-export class JoinComponent {
+export class CreateComponent {
   private _http: HttpClient;
   private _baseUrl: string;
   private _teamNameLabel = "Team name";
-  private _screenNameLabel = "Participant name";
-  private _sendButtonCaption = "Join team";
+  private _scrumMasterLabel = "Scrum master name";
+  private _sendButtonCaption = "Create team";
 
   private _errorText: string;
-  private _screenName: string;
+  private _scrumMaster: string;
   private _teamName: string;
-  private _request = new JoinRequest();
+  private _request = new CreateRequest();
   
   constructor(http: HttpClient, @Inject('BASE_URL') baseUrl: string) {
     this._http = http;
     this._baseUrl = baseUrl;
   }
 
-  joinTeam(): void {
+  createTeam(): void {
     
     this
-      ._http.post(this._baseUrl + 'api/game/join', this._request)
+      ._http.post(this._baseUrl + 'api/game/create', this._request)
       .subscribe(
       result => { this._errorText = result.toString(); this._errorText = null; },
       error => { console.error(error); this._errorText = error; });

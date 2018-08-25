@@ -1,32 +1,20 @@
 import { Component, OnInit } from '@angular/core';
-import { Game } from '../core/game';
+import { Router } from '@angular/router';
+import { GameService } from '../core/services/game.service';
 
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
 })
 
-export class HomeComponent implements OnInit{
+export class HomeComponent implements OnInit {  
 
-  private _game: Game;
-
-  showJoin(): boolean {
-    return this._game == null
-  }
+  constructor(public gameService: GameService,
+  public router: Router) { }
 
   ngOnInit() {
-    var _loadedGame: any = localStorage.getItem("current_game");
-    if (_loadedGame == null) {
-      // show join game frame
-      return;
-    }
+    if (this.gameService.IsInGame)
+      this.router.navigate(['/playfield']);;
     
-    this._game = JSON.parse(_loadedGame);
-    if (this._game == null) {
-      // show join game frame
-      return;
-    }
-
-    // route to game
   }
 }
