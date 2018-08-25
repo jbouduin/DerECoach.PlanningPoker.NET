@@ -36,6 +36,7 @@
 
   <ItemGroup>
     <None Remove="ClientApp\src\app\core\create-request.ts" />
+    <None Remove="ClientApp\src\app\core\domain\PokerCard.ts" />
     <None Remove="ClientApp\src\app\core\game-participant.ts" />
     <None Remove="ClientApp\src\app\core\game.ts" />
     <None Remove="ClientApp\src\app\core\join-request.ts" />
@@ -46,6 +47,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <TypeScriptCompile Include="ClientApp\src\app\core\domain\PokerCard.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\core\requests\create-request.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\core\requests\join-request.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\core\domain\game.ts" />
@@ -54,6 +56,10 @@
     <TypeScriptCompile Include="ClientApp\src\app\game\playfield.component.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\home\create.component.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\home\join.component.ts" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="ClientApp\src\images\" />
   </ItemGroup>
 
   <Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">

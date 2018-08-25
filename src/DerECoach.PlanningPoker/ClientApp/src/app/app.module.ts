@@ -25,7 +25,7 @@ import { PlayfieldComponent } from './game/playfield.component';
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
     HttpClientModule,
-    FormsModule,
+    FormsModule,    
     RouterModule.forRoot([
       { path: '', component: HomeComponent, pathMatch: 'full' },
       { path: 'playfield', component: PlayfieldComponent }      

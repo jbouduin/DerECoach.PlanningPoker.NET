@@ -1,0 +1,63 @@
+.availableEstimations ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.availableEstimations li {
+  display: inline-block;
+  margin: 4px;
+  width: 74px;
+  height: 105px;
+  font-size: 32pt;
+  background: url(../../images/cardbg.png) no-repeat center center;
+}
+
+.availableEstimations a {
+  display: block;
+  width: 74px;
+  height: 105px;
+  padding-top: 24px;
+  text-align: center;
+  text-decoration: none;
+}
+
+  .availableEstimations a:hover {
+    text-decoration: none;
+  }
+
+  .availableEstimations a:active {
+    text-decoration: none;
+  }
+
+/* Estimation result */
+
+.estimationResult ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.estimationResult li {
+  display: inline-block;
+  margin: 4px;
+  vertical-align: top;
+}
+
+.estimationResult .estimationItemValue {
+  display: block;
+  width: 74px;
+  height: 105px;
+  padding-top: 24px;
+  background: url(../../images/cardbg.png) no-repeat center center; 
+  text-align: center;
+  font-size: 32pt;
+  color: #337ab7;
+}
+
+.estimationResult .estimationItemName {
+  display: block;
+  width: 74px;
+  padding: 3px 0 5px 0;
+  text-align: center;
+  font-size: 10pt;
+  font-weight: bold;
+}

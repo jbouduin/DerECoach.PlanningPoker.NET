@@ -1,4 +1,4 @@
 export class JoinRequest {
-  TeamName: string;
-  ScreenName: string;
+  teamName: string;
+  screenName: string;
 }

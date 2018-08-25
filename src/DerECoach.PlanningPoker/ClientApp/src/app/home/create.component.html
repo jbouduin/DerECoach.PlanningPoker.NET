@@ -9,7 +9,7 @@
     <div class="form-group">
       <label for="teamName" class="col-sm-3 control-label">{{_teamNameLabel}}:</label>
       <div class="col-sm-9 full-column">
-        <input type="text" class="form-control" placeholder="Team name" [(ngModel)]="_request.TeamName"
+        <input type="text" class="form-control" placeholder="Team name" [(ngModel)]="_request.teamName"
                name="teamName" id="teamName" #teamName="ngModel" required />
         <div [hidden]="teamName.valid || teamName.untouched" class="text-danger">
           Team name is mandatory
@@ -19,7 +19,7 @@
     <div class="form-group">
       <label for="scrumMaster" class="col-sm-3 control-label">{{_scrumMasterLabel}}:</label>
       <div class="col-sm-9 full-column">
-        <input type="text" class="form-control" placeholder="Your name" [(ngModel)]="_request.ScrumMaster"
+        <input type="text" class="form-control" placeholder="Your name" [(ngModel)]="_request.scrumMaster"
                name="scrumMaster" id="scrumMaster" #scrumMaster="ngModel" required />
         <div [hidden]="scrumMaster.valid || scrumMaster.untouched" class="text-danger">
           Scrum Master is mandatory
@@ -27,7 +27,7 @@
       </div>
     </div>
     <div class="form-group button-row">      
-      <button class="btn btn-default fr" [disabled]="!createForm.form.valid" (click)="createTeam()">{{_sendButtonCaption}}</button>
+      <button class="btn btn-default fr" [disabled]="!createForm.form.valid" (click)="create()">{{_sendButtonCaption}}</button>
     </div>
   </div>
 

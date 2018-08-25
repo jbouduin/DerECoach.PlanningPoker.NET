@@ -1,5 +1,6 @@
-import { Component, Inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Component } from '@angular/core';
+
+import { GameService } from '../core/services/game.service';
 import { JoinRequest } from '../core/requests/join-request';
 
 
@@ -7,10 +8,9 @@ import { JoinRequest } from '../core/requests/join-request';
   selector: 'join-component',
   templateUrl: './join.component.html'
 })
-
 export class JoinComponent {
-  private _http: HttpClient;
-  private _baseUrl: string;
+
+  private _gameService: GameService;  
   private _teamNameLabel = "Team name";
   private _screenNameLabel = "Participant name";
   private _sendButtonCaption = "Join team";
@@ -20,19 +20,11 @@ export class JoinComponent {
   private _teamName: string;
   private _request = new JoinRequest();
   
-  constructor(http: HttpClient, @Inject('BASE_URL') baseUrl: string) {
-    this._http = http;
-    this._baseUrl = baseUrl;
+  constructor(gameService: GameService) {
+    this._gameService = gameService;  
   }
 
-  joinTeam(): void {
-    
-    this
-      ._http.post(this._baseUrl + 'api/game/join', this._request)
-      .subscribe(
-      result => { this._errorText = result.toString(); this._errorText = null; },
-      error => { console.error(error); this._errorText = error; });
-    
-    
+  join(): void {        
+    this._errorText = this._gameService.join(this._request);
   }
 }

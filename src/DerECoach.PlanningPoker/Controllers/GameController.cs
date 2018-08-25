@@ -1,7 +1,7 @@
 ﻿using DerECoach.PlanningPoker.Core.Domain;
 using DerECoach.PlanningPoker.Core.Requests;
+using DerECoach.PlanningPoker.Core.Services;
 using Microsoft.AspNetCore.Mvc;
-using System;
 
 namespace DerECoach.PlanningPoker.Controllers
 {
@@ -11,20 +11,17 @@ namespace DerECoach.PlanningPoker.Controllers
         [HttpPost("join")]
         public Game Join([FromBody] JoinRequest request)
         {
+            var result = GameService.GetInstance().GetGame(request.TeamName);
+            
             var newParticipant = Participant.CreateParticipant(request.ScreenName);
-            var result = Game.GetGame();
-            result.AddParticipant(newParticipant);
+            result.AddParticipant(newParticipant);            
             return result;
         }
 
         [HttpPost("create")]
         public Game Create([FromBody] CreateRequest request)
         {
-            throw new NotImplementedException();
-            //var newParticipant = Participant.CreateParticipant(request.ScreenName);
-            //var result = Game.GetGame();
-            //result.AddParticipant(newParticipant);
-            //return result;
+            return GameService.GetInstance().CreateGame(request);            
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using DerECoach.PlanningPoker.Core.Requests;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace DerECoach.PlanningPoker.Core.Domain
@@ -6,29 +7,32 @@ namespace DerECoach.PlanningPoker.Core.Domain
     public class Game
     {
         #region public properties ---------------------------------------------
-        public string ScreenName { get; private set; }
+        public string TeamName { get; private set; }
+        public Participant ScrumMaster { get; private set; }        
         public IList<Participant> AllParticipants { get; } = new List<Participant>();
         #endregion
 
         #region public methods ------------------------------------------------
+        public bool HasParticipant(string screenName)
+        {
+            return AllParticipants.Any(a => a.ScreenName.ToLower().Equals(screenName.ToLower()));
+        }
+
         public void AddParticipant(Participant newParticipant)
         {
-            if (AllParticipants.Any(a => a.ScreenName.ToLower().Equals(newParticipant.ScreenName.ToLower())))
-                return;
-            ScreenName = newParticipant.ScreenName;
+            if (HasParticipant(newParticipant.ScreenName))
+                return;        
             AllParticipants.Add(newParticipant);
         }
         #endregion
 
-        #region singleton implementation --------------------------------------
-        private static Game _game;
-        public static Game GetGame()
+        #region constructor ---------------------------------------------------
+        public Game(CreateRequest request)
         {
-            return _game ?? (_game = new Game());
-        }
-
-        private Game()
-        {
+            TeamName = request.TeamName;
+            ScrumMaster = Participant.CreateParticipant(request.ScrumMaster);
+            AddParticipant(Participant.CreateParticipant("John"));
+            AddParticipant(Participant.CreateParticipant("Mary"));
         }
         #endregion 
     }

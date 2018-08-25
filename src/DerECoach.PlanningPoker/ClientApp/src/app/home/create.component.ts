@@ -1,5 +1,6 @@
-import { Component, Inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Component } from '@angular/core';
+
+import { GameService } from '../core/services/game.service';
 import { CreateRequest } from '../core/requests/create-request';
 
 
@@ -9,8 +10,9 @@ import { CreateRequest } from '../core/requests/create-request';
 })
 
 export class CreateComponent {
-  private _http: HttpClient;
-  private _baseUrl: string;
+
+  private _gameService: GameService;
+
   private _teamNameLabel = "Team name";
   private _scrumMasterLabel = "Scrum master name";
   private _sendButtonCaption = "Create team";
@@ -20,19 +22,11 @@ export class CreateComponent {
   private _teamName: string;
   private _request = new CreateRequest();
   
-  constructor(http: HttpClient, @Inject('BASE_URL') baseUrl: string) {
-    this._http = http;
-    this._baseUrl = baseUrl;
+  constructor(gameService: GameService) {
+    this._gameService = gameService;
   }
 
-  createTeam(): void {
-    
-    this
-      ._http.post(this._baseUrl + 'api/game/create', this._request)
-      .subscribe(
-      result => { this._errorText = result.toString(); this._errorText = null; },
-      error => { console.error(error); this._errorText = error; });
-    
-    
+  create(): void {
+    this._errorText = this._gameService.create(this._request);    
   }
 }

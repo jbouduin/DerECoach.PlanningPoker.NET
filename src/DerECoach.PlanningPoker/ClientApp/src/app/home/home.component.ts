@@ -13,8 +13,7 @@ export class HomeComponent implements OnInit {
   public router: Router) { }
 
   ngOnInit() {
-    if (this.gameService.IsInGame)
-      this.router.navigate(['/playfield']);;
-    
+    if (this.gameService.isInGame)
+      this.router.navigate(['/playfield']);    
   }
 }

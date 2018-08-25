@@ -1,4 +1,4 @@
 export class Participant {
-  ScreenName: string;
-  LastEstimation: string;
+  screenName: string;
+  lastEstimation: string;
 }
