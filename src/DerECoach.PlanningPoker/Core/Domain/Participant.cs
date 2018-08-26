@@ -10,15 +10,17 @@ namespace DerECoach.PlanningPoker.Core.Domain
         #region public properties ---------------------------------------------
         public string ScreenName { get; private set; }
         public string LastEstimation { get; set; }
+        public string Uuid { get; private set; }
         #endregion
 
         #region factory methods -----------------------------------------------
-        public static Participant CreateParticipant(string screenName)
+        public static Participant CreateParticipant(string screenName, string uuid)
         {
-            Participant result = new Participant();
-            result.ScreenName = screenName;
-
-            return result;
+            return new Participant
+            {
+                ScreenName = screenName,
+                Uuid = uuid
+            };
         }
         #endregion
 

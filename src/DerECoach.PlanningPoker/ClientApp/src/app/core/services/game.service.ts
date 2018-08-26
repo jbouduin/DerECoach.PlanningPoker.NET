@@ -1,8 +1,8 @@
-import { Injectable, Inject, OnInit } from '@angular/core';
+import { Injectable, Inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-
 import { Game } from '../domain/game';
+import { v4 as uuid } from 'uuid';
 import { Participant } from '../domain/participant';
 import { JoinRequest } from '../requests/join-request';
 import { CreateRequest } from '../requests/create-request';
@@ -13,7 +13,7 @@ export class GameService {
   private _http: HttpClient;
   private _baseUrl: string;
   private _router: Router;
-
+  private _uuid: string = uuid();
   private _game: Game;
   
 
@@ -33,12 +33,21 @@ export class GameService {
     return this._game.scrumMaster;
   }
 
+  isMe(participant: Participant): boolean {    
+    return this._uuid == participant.uuid;
+  }
+
+  isScrumMasterMe(): boolean {
+    return this.isMe(this._game.scrumMaster);
+  }
+
   constructor(http: HttpClient, router: Router, @Inject('BASE_URL') baseUrl: string) {
     this._http = http;
     this._router = router;
     this._baseUrl = baseUrl;
 
     console.debug("creating gameservice");
+    console.debug(this._uuid);
     if (this._game != null)
       return;
 
@@ -49,10 +58,12 @@ export class GameService {
     }
 
     this._game = JSON.parse(_loadedGame);
+    
   }
   
   join(request: JoinRequest): string {
 
+    request.uuid = this._uuid;
     var result: string = null;
     this
       ._http.post<Game>(this._baseUrl + 'api/game/join', request)
@@ -71,6 +82,8 @@ export class GameService {
   }
 
   create(request: CreateRequest): string {
+
+    request.uuid = this._uuid;
     var result: string = null;
     this
       ._http.post<Game>(this._baseUrl + 'api/game/create', request)

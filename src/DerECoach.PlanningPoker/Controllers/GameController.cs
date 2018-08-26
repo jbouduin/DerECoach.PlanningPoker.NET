@@ -13,7 +13,7 @@ namespace DerECoach.PlanningPoker.Controllers
         {
             var result = GameService.GetInstance().GetGame(request.TeamName);
             
-            var newParticipant = Participant.CreateParticipant(request.ScreenName);
+            var newParticipant = Participant.CreateParticipant(request.ScreenName, request.Uuid);
             result.AddParticipant(newParticipant);            
             return result;
         }

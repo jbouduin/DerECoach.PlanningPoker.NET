@@ -23,8 +23,31 @@ export class PlayfieldComponent {
     return this._gameService.participants;
   }
 
+  get participantScreenNames(): Array<string> {
+
+    var result = new Array<string>();
+    for (let p of this._gameService.participants) {
+      if (this._gameService.isMe(p)) {
+        result.push(p.screenName + " (me)");
+      }
+      else {
+        result.push(p.screenName);
+      }
+    }
+    return result;
+  }
+
   get scrumMaster(): Participant {
     return this._gameService.scrumMaster;
+  }
+
+  get scrumMasterScreenName(): string {
+    if (this._gameService.isScrumMasterMe()) {
+      return this._gameService.scrumMaster.screenName + " (me)";
+    }
+    else {
+      return this._gameService.scrumMaster.screenName
+    }
   }
 
   get availableCards(): Array<PokerCard> {

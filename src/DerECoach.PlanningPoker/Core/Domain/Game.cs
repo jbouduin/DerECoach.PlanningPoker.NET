@@ -30,9 +30,9 @@ namespace DerECoach.PlanningPoker.Core.Domain
         public Game(CreateRequest request)
         {
             TeamName = request.TeamName;
-            ScrumMaster = Participant.CreateParticipant(request.ScrumMaster);
-            AddParticipant(Participant.CreateParticipant("John"));
-            AddParticipant(Participant.CreateParticipant("Mary"));
+            ScrumMaster = Participant.CreateParticipant(request.ScrumMaster, request.Uuid);
+            AddParticipant(Participant.CreateParticipant("John", "some uuid"));
+            AddParticipant(Participant.CreateParticipant("Mary", "some other uuid"));
         }
         #endregion 
     }
