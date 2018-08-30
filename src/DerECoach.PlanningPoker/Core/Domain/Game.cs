@@ -1,11 +1,20 @@
-﻿using DerECoach.PlanningPoker.Core.Requests;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace DerECoach.PlanningPoker.Core.Domain
 {
     public class Game
     {
+        #region constants -----------------------------------------------------
+        private const int READ_LOCK_TIMEOUT = 3000;
+        private const int WRITE_LOCK_TIMEOUT = 10000;
+        #endregion
+
+        #region private fields ------------------------------------------------        
+        //private static ReaderWriterLock readerWriterLock = new ReaderWriterLock();
+        #endregion
+
         #region public properties ---------------------------------------------
         public string TeamName { get; private set; }
         public Participant ScrumMaster { get; private set; }        
@@ -15,24 +24,55 @@ namespace DerECoach.PlanningPoker.Core.Domain
         #region public methods ------------------------------------------------
         public bool HasParticipant(string screenName)
         {
-            return AllParticipants.Any(a => a.ScreenName.ToLower().Equals(screenName.ToLower()));
+            try
+            {
+                //readerWriterLock.AcquireReaderLock(READ_LOCK_TIMEOUT);
+                return AllParticipants.Any(a => a.ScreenName.ToLower().Equals(screenName.ToLower()));
+            }
+            finally
+            {
+                //readerWriterLock.ReleaseReaderLock();
+            }
+        }
+
+        public async Task<bool> HasParticipantASync(string screenName)
+        {
+            return await Task.Run(() =>
+            {
+                return HasParticipant(screenName);
+            });
         }
 
         public void AddParticipant(Participant newParticipant)
         {
-            if (HasParticipant(newParticipant.ScreenName))
-                return;        
-            AllParticipants.Add(newParticipant);
+            if (!HasParticipant(newParticipant.ScreenName))
+            {
+                try
+                {
+                    //readerWriterLock.AcquireWriterLock(WRITE_LOCK_TIMEOUT);
+                    AllParticipants.Add(newParticipant);
+                }
+                finally
+                {
+                    //readerWriterLock.ReleaseWriterLock();
+                }
+            }
+        }
+        
+        public async Task AddParticipantAsync(Participant newParticipant)
+        {
+            await Task.Run(() =>
+            {
+                AddParticipant(newParticipant);
+            });
         }
         #endregion
 
         #region constructor ---------------------------------------------------
-        public Game(CreateRequest request)
+        public Game(string teamName, Participant scrumMaster)
         {
-            TeamName = request.TeamName;
-            ScrumMaster = Participant.CreateParticipant(request.ScrumMaster, request.Uuid);
-            AddParticipant(Participant.CreateParticipant("John", "some uuid"));
-            AddParticipant(Participant.CreateParticipant("Mary", "some other uuid"));
+            TeamName = teamName;            ;
+            ScrumMaster = scrumMaster;
         }
         #endregion 
     }

@@ -6,49 +6,46 @@ import { v4 as uuid } from 'uuid';
 import { Participant } from '../domain/participant';
 import { JoinRequest } from '../requests/join-request';
 import { CreateRequest } from '../requests/create-request';
+import * as signalR from '@aspnet/signalr';
 
 @Injectable()
 export class GameService {
 
-  private _http: HttpClient;
-  private _baseUrl: string;
-  private _router: Router;
-  private _uuid: string = uuid();
-  private _game: Game;
-  
-
+  private uuid: string = uuid();
+  private game: Game;
+  private connection = new signalR.HubConnectionBuilder().withUrl("/game").build();
+    
   get isInGame(): boolean {
-    return this._game != null;
+    return this.game != null;
   }
 
   get teamName(): string {    
-    return this._game.teamName;
+    return this.game.teamName;
   }
   
   get participants(): Array<Participant>{
-    return this._game.allParticipants;
+    return this.game.allParticipants;
   }
 
   get scrumMaster(): Participant {
-    return this._game.scrumMaster;
+    return this.game.scrumMaster;
   }
 
   isMe(participant: Participant): boolean {    
-    return this._uuid == participant.uuid;
+    return this.uuid == participant.uuid;
   }
 
   isScrumMasterMe(): boolean {
-    return this.isMe(this._game.scrumMaster);
+    return this.isMe(this.game.scrumMaster);
   }
 
-  constructor(http: HttpClient, router: Router, @Inject('BASE_URL') baseUrl: string) {
-    this._http = http;
-    this._router = router;
-    this._baseUrl = baseUrl;
-
+  constructor(private router: Router) {
+    
+    this.connection.start().catch(err => console.log(err));
+    this.connection.on("joined", participant => this.onjoined(participant));
     console.debug("creating gameservice");
-    console.debug(this._uuid);
-    if (this._game != null)
+    console.debug(this.uuid);
+    if (this.game != null)
       return;
 
     var _loadedGame: any = localStorage.getItem("current_game");
@@ -57,40 +54,34 @@ export class GameService {
       return;
     }
 
-    this._game = JSON.parse(_loadedGame);
+    this.game = JSON.parse(_loadedGame);
     
   }
   
   join(request: JoinRequest): string {
 
-    request.uuid = this._uuid;
     var result: string = null;
-    this
-      ._http.post<Game>(this._baseUrl + 'api/game/join', request)
-      .subscribe(
-        response => {
-          this._game = response;
-          console.debug(this._game);
-          this._router.navigate(['/playfield']);
-        },
-        error => {
-          console.error(error);
-          result = error.ToString;
-        });
+    request.uuid = this.uuid;
+    this.connection.invoke<Game>("join", request)
+      .then(response => { this.game = response; console.debug(this.game); this.router.navigate(['/playfield']); })
+      .catch(error => { console.error(error); result = error.ToString; });
     
     return result;
   }
 
   create(request: CreateRequest): string {
 
-    request.uuid = this._uuid;
     var result: string = null;
-    this
-      ._http.post<Game>(this._baseUrl + 'api/game/create', request)
-      .subscribe(
-        response => { this._game = response; this._router.navigate(['/playfield']); },
-      error => { console.error(error); result = error.ToString; });
+
+    request.uuid = this.uuid;
+    this.connection.invoke<Game>("create", request)
+      .then(response => { this.game = response; console.debug(this.game); this.router.navigate(['/playfield']); })
+      .catch(error => { console.error(error); result = error.ToString; });
     return result;
   }
-  
+
+  onjoined(participant: Participant): void {
+    console.debug(participant);
+    this.game.allParticipants.push(participant);
+  }
 }

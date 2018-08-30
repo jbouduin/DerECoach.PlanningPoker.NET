@@ -3,8 +3,7 @@ namespace DerECoach.PlanningPoker.Core.Domain
 {
     public class Participant
     {
-        #region private fields ------------------------------------------------
-        private string _lastEstimation;
+        #region private fields ------------------------------------------------        
         #endregion
 
         #region public properties ---------------------------------------------
