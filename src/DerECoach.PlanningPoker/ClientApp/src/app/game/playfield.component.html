@@ -17,7 +17,7 @@
             Development Team
           </div>
           <ul class="list-group">
-            <li class="list-group-item" *ngFor="let screenName of participantScreenNames">
+            <li class="list-group-item" *ngFor="let screenName of developerScreenNames">
               {{screenName}}
             </li>
           </ul>
@@ -35,23 +35,37 @@
             {{teamName}}
           </h3>
         </div>
-        <div>
-          <h4>
-            Select an estimation
-          </h4>
-        </div>
-        <div class="availableEstimations">
-          <ul class="availableEstimations">
-            <li *ngFor="let card of availableCards">
-              <a (click)="doNothing">
-                {{card.label}}
-              </a>
-            </li>
-          </ul>
+        <div *ngIf="isShowEstimations">
+          <div>
+            <h4>
+              Estimations
+            </h4>
+            <ul class="estimationResult">
+              <li *ngFor="let estimation of estimations">              
+                <span class="estimationItemValue" >{{estimation.lastEstimation}}</span>
+                <span class="estimationItemName">{{estimation.screenName}}</span>              
+              </li>
+            </ul>
+          </div>
+          </div>
+          <div *ngIf="isShowCards">
+            <div>
+              <h4>
+                Select an estimation
+              </h4>
+            </div>
+            <div class="availableEstimations">
+              <ul class="availableEstimations">
+                <li *ngFor="let card of availableCards">
+                  <a (click)="estimate(card.label)">
+                    {{card.label}}
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
   </div>
-
 </div>
 

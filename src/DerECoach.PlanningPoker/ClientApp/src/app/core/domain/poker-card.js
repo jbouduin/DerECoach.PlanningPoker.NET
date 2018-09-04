@@ -6,4 +6,4 @@ var PokerCard = /** @class */ (function () {
     return PokerCard;
 }());
 exports.PokerCard = PokerCard;
-//# sourceMappingURL=PokerCard.js.map
+//# sourceMappingURL=poker-card.js.map

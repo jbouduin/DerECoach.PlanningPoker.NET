@@ -2,7 +2,6 @@
 using DerECoach.PlanningPoker.Core.Requests;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using System.Threading;
 
 namespace DerECoach.PlanningPoker.Core.Services
 {
@@ -15,20 +14,20 @@ namespace DerECoach.PlanningPoker.Core.Services
 
         #region private fields ------------------------------------------------
         private Dictionary<string, Game> _games;
-        private static ReaderWriterLock readerWriterLock = new ReaderWriterLock();
+        //private static ReaderWriterLock readerWriterLock = new ReaderWriterLock();
         #endregion
 
-        #region public methods ------------------------------------------------
+        #region public methods: game related ----------------------------------
         public Game GetGame(string teamName)
         {
             try
             {
-                readerWriterLock.AcquireReaderLock(READ_LOCK_TIMEOUT);
+                //readerWriterLock.AcquireReaderLock(READ_LOCK_TIMEOUT);
                 return _games[teamName];
             }
             finally
             {
-                readerWriterLock.ReleaseReaderLock();
+                //readerWriterLock.ReleaseReaderLock();
             }
         }
 
@@ -45,13 +44,13 @@ namespace DerECoach.PlanningPoker.Core.Services
             Game result = null;
             try
             {
-                readerWriterLock.AcquireReaderLock(10000);
+                //readerWriterLock.AcquireReaderLock(10000);
                 result = _games[teamName];
                 result.AddParticipant(participant);
             }
             finally
             {
-                readerWriterLock.ReleaseReaderLock();
+                //readerWriterLock.ReleaseReaderLock();
             }
             return result;
         }
@@ -66,17 +65,18 @@ namespace DerECoach.PlanningPoker.Core.Services
 
         public Game CreateGame(CreateRequest request)
         {
-            var result = new Game(request.TeamName, Participant.CreateParticipant(request.ScrumMaster, request.Uuid));
+            var result = new Game(request.TeamName);
+            result.AddParticipant(Participant.CreateParticipant(request.ScrumMaster, request.Uuid, true));
             try
             {
-                readerWriterLock.AcquireWriterLock(READ_LOCK_TIMEOUT);
+                //readerWriterLock.AcquireWriterLock(READ_LOCK_TIMEOUT);
                 _games.Add(request.TeamName, result);
+                return result;
             }
             finally
             {
-                readerWriterLock.ReleaseWriterLock();
+                //readerWriterLock.ReleaseWriterLock();
             }
-            return result;
         }
 
         public async Task<Game> CreateGameASync(CreateRequest request)
@@ -84,6 +84,34 @@ namespace DerECoach.PlanningPoker.Core.Services
             return await Task.Run(() =>
             {
                 return CreateGame(request);
+            });
+        }
+        #endregion
+
+        #region methods estimation related ------------------------------------
+        public async Task<Participant> Estimate(EstimateRequest request)
+        {
+            //readerWriterLock.AcquireWriterLock(READ_LOCK_TIMEOUT);
+            try
+            {
+                
+                var game = _games[request.TeamName];
+                var result = await game.GetParticipantAsync(request.Uuid);
+                result.LastEstimation = request.Card;
+                return result;
+            }
+            finally
+            {
+                //readerWriterLock.ReleaseWriterLock();
+            }
+            
+        }
+
+        public async Task<Participant> EstimateAsync(EstimateRequest request)
+        {
+            return await Task.Run(() =>
+            {
+                return Estimate(request);
             });
         }
         #endregion

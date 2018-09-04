@@ -12,12 +12,11 @@ namespace DerECoach.PlanningPoker.Core.Domain
         #endregion
 
         #region private fields ------------------------------------------------        
-        //private static ReaderWriterLock readerWriterLock = new ReaderWriterLock();
+        private readonly AsyncReaderWriterLock _lock = new AsyncReaderWriterLock();
         #endregion
 
         #region public properties ---------------------------------------------
-        public string TeamName { get; private set; }
-        public Participant ScrumMaster { get; private set; }        
+        public string TeamName { get; private set; }        
         public IList<Participant> AllParticipants { get; } = new List<Participant>();
         #endregion
 
@@ -66,13 +65,25 @@ namespace DerECoach.PlanningPoker.Core.Domain
                 AddParticipant(newParticipant);
             });
         }
+
+        public Participant GetParticipant(string uuid)
+        {
+            return AllParticipants.FirstOrDefault(fod => fod.Uuid == uuid);
+        }
+
+        public async Task<Participant> GetParticipantAsync(string uuid)
+        {
+            return await Task.Run(() =>
+            {
+                return GetParticipant(uuid);
+            });
+        }
         #endregion
 
         #region constructor ---------------------------------------------------
-        public Game(string teamName, Participant scrumMaster)
+        public Game(string teamName)
         {
-            TeamName = teamName;            ;
-            ScrumMaster = scrumMaster;
+            TeamName = teamName;                        
         }
         #endregion 
     }

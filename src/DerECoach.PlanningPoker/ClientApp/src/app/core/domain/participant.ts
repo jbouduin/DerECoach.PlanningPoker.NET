@@ -1,5 +1,6 @@
 export class Participant {
   screenName: string;
-  lastEstimation: string;
+  lastEstimation: string = "";
   uuid: string;
+  isScrumMaster: boolean;
 }

@@ -36,10 +36,12 @@
 
   <ItemGroup>
     <None Remove="ClientApp\src\app\core\create-request.ts" />
-    <None Remove="ClientApp\src\app\core\domain\PokerCard.ts" />
+    <None Remove="ClientApp\src\app\core\domain\enum-game-status.ts" />
+    <None Remove="ClientApp\src\app\core\domain\poker-card.ts" />
     <None Remove="ClientApp\src\app\core\game-participant.ts" />
     <None Remove="ClientApp\src\app\core\game.ts" />
     <None Remove="ClientApp\src\app\core\join-request.ts" />
+    <None Remove="ClientApp\src\app\core\requests\estimate-request.ts" />
     <None Remove="ClientApp\src\app\core\services\game.service.ts" />
     <None Remove="ClientApp\src\app\game\playfield.component.ts" />
     <None Remove="ClientApp\src\app\home\create.component.ts" />
@@ -47,8 +49,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <TypeScriptCompile Include="ClientApp\src\app\core\domain\PokerCard.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\core\domain\enum-game-status.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\core\domain\poker-card.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\core\requests\create-request.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\core\requests\estimate-request.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\core\requests\join-request.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\core\domain\game.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\core\domain\participant.ts" />

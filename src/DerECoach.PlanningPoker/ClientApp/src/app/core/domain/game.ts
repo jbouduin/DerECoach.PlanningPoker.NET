@@ -1,7 +1,6 @@
 import { Participant } from './participant';
 
 export class Game {
-  teamName: string;
-  scrumMaster: Participant;  
+  teamName: string;  
   allParticipants: Array<Participant>
 }
