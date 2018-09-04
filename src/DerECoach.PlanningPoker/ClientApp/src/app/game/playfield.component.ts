@@ -53,11 +53,10 @@ export class PlayfieldComponent {
   get availableCards(): Array<PokerCard> {
     return this.arrayOfCards;
   }
-
+  
   get isShowCards(): boolean {
     return this.gameService.gameStatus != EGameStatus.None &&
-      this.gameService.gameStatus != EGameStatus.Revealed
-      // &&      this.gameService.me.lastEstimation == "";
+      this.gameService.gameStatus != EGameStatus.Revealed      
   }
 
   get isShowEstimations(): boolean {
@@ -67,7 +66,24 @@ export class PlayfieldComponent {
   }
 
   get estimations(): Array<Participant> {
-    return this.gameService.estimations;
+    var result = new Array<Participant>();
+    this.gameService.participants
+      .filter(p => p.lastEstimation != "")
+      .forEach(fe => {
+        var estimation = new Participant();
+        estimation.screenName = fe.screenName;
+        if (this.gameService.gameStatus == EGameStatus.Revealed) {
+          estimation.lastEstimation = fe.lastEstimation;
+        }
+        else {
+          if (fe.uuid == this.gameService.me.uuid)
+            estimation.lastEstimation = fe.lastEstimation;
+          else
+            estimation.lastEstimation = "";
+        }
+        result.push(estimation);
+      });
+    return result;
   }
 
   get showEstimationValues(): boolean {

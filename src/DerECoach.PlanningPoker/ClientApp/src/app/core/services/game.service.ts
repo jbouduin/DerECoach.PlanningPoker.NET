@@ -107,7 +107,7 @@ export class GameService {
     this.connection.invoke("estimate", request)
       .then(() => {
         this.me.lastEstimation = card;
-        this.gameStatus = EGameStatus.EstimationGiven;
+        this.setGameStatusAfterEstimation();
       })
       .catch(error => { console.error(error);  });
   }
@@ -122,6 +122,16 @@ export class GameService {
     var theoneweneed = this.game.allParticipants.filter(p => p.uuid == participant.uuid)[0];
     console.debug(theoneweneed);
     this.game.allParticipants.filter(p => p.uuid == participant.uuid)[0].lastEstimation = participant.lastEstimation;
-    this.gameStatus = EGameStatus.EstimationGiven;
+    this.setGameStatusAfterEstimation();
+  }
+
+  // set gamestatus after estimation
+  setGameStatusAfterEstimation(): void {
+    if (this.game.allParticipants.filter(p => p.lastEstimation == "").length == 0) {
+      this.gameStatus = EGameStatus.Revealed;
+    }
+    else {
+      this.gameStatus = EGameStatus.EstimationGiven;
+    }
   }
 }
