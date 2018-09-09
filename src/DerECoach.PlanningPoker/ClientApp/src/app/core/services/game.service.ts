@@ -21,7 +21,7 @@ export class GameService {
   private game: Game;  
   private connection = new signalR.HubConnectionBuilder().withUrl("/game").build();
 
-  public gameStatus: EGameStatus = EGameStatus.Started;
+  public gameStatus: EGameStatus = EGameStatus.None;
   public cards: Array<Card>;
 
   get isInGame(): boolean {
