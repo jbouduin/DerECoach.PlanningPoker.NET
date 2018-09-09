@@ -89,15 +89,14 @@ namespace DerECoach.PlanningPoker.Core.Services
         #endregion
 
         #region methods estimation related ------------------------------------
-        public async Task<Participant> Estimate(EstimateRequest request)
+        public async Task<Estimation> Estimate(EstimateRequest request)
         {
             //readerWriterLock.AcquireWriterLock(READ_LOCK_TIMEOUT);
             try
             {
                 
                 var game = _games[request.TeamName];
-                var result = await game.GetParticipantAsync(request.Uuid);
-                result.LastEstimation = request.Card;
+                var result = await game.EstimateAsync(request.Uuid, request.Index);                
                 return result;
             }
             finally
@@ -107,7 +106,7 @@ namespace DerECoach.PlanningPoker.Core.Services
             
         }
 
-        public async Task<Participant> EstimateAsync(EstimateRequest request)
+        public async Task<Estimation> EstimateAsync(EstimateRequest request)
         {
             return await Task.Run(() =>
             {

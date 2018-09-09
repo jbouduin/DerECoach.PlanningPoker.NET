@@ -7,10 +7,15 @@ namespace DerECoach.PlanningPoker.Core.Domain
         #endregion
 
         #region public properties ---------------------------------------------
-        public string ScreenName { get; private set; }
-        public string LastEstimation { get; set; }
+        public string ScreenName { get; private set; }        
         public string Uuid { get; private set; }
-        public bool IsScrumMaster { get; private set; }
+        public bool ScrumMaster { get; private set; }
+        #endregion
+
+        #region constructor ---------------------------------------------------
+        private Participant()
+        {
+        }
         #endregion
 
         #region factory methods -----------------------------------------------
@@ -19,9 +24,8 @@ namespace DerECoach.PlanningPoker.Core.Domain
             return new Participant
             {
                 ScreenName = screenName,
-                Uuid = uuid,
-                LastEstimation = "",
-                IsScrumMaster = isScrumMaster
+                Uuid = uuid,                
+                ScrumMaster = isScrumMaster
             };
         }
         #endregion

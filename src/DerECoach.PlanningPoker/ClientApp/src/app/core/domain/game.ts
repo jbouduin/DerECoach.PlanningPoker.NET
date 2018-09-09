@@ -1,6 +1,8 @@
 import { Participant } from './participant';
+import { Estimation } from './estimation';
 
 export class Game {
   teamName: string;  
-  allParticipants: Array<Participant>
+  participants: Array<Participant>;
+  estimations: Array<Estimation>;
 }

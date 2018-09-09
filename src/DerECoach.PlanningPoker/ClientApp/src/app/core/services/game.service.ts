@@ -8,17 +8,22 @@ import { CreateRequest } from '../requests/create-request';
 import { EstimateRequest } from '../requests/estimate-request';
 import { EGameStatus } from '../domain/enum-game-status';
 import * as signalR from '@aspnet/signalr';
+import { Card } from '../domain/card';
+import { JoinResponse } from '../responses/join-response';
+import { CreateResponse } from '../responses/create-response';
+import { Estimation } from '../domain/estimation';
+
 
 @Injectable()
 export class GameService {
 
   private uuid: string = uuid();
-  private game: Game;
+  private game: Game;  
   private connection = new signalR.HubConnectionBuilder().withUrl("/game").build();
 
   public gameStatus: EGameStatus = EGameStatus.Started;
+  public cards: Array<Card>;
 
-  
   get isInGame(): boolean {
     return this.game != null;
   }
@@ -28,24 +33,19 @@ export class GameService {
   }
   
   get participants(): Array<Participant>{
-    var result = this.game.allParticipants;    
-    return result;
+    return this.game.participants;
   }
 
   get scrumMaster(): Participant {
-    return this.game.allParticipants.filter(p => p.isScrumMaster == true)[0];
-    
+    return this.game.participants.filter(p => p.scrumMaster == true)[0];    
   }
 
   get me(): Participant {
-    return this.game.allParticipants.filter(p => p.uuid == this.uuid)[0];
+    return this.game.participants.filter(p => p.uuid == this.uuid)[0];
   }
 
-  get estimations(): Array<Participant> {
-
-    var result = new Array<Participant>();
-    this.game.allParticipants.filter(p => p.lastEstimation != "").forEach(function (fe) { console.debug("building estimations array", result); result.push(fe); });
-    return result;
+  get estimations(): Array<Estimation> {
+    return this.game.estimations;
   }
 
   isMe(participant: Participant): boolean {    
@@ -54,6 +54,10 @@ export class GameService {
 
   isScrumMasterMe(): boolean {
     return this.me.uuid == this.scrumMaster.uuid;
+  }
+
+  public cardByIndex(index: number): Card {
+    return this.cards.filter(card => card.index == index)[0];
   }
 
   constructor(private router: Router) {
@@ -80,8 +84,13 @@ export class GameService {
 
     var result: string = null;
     request.uuid = this.uuid;
-    this.connection.invoke<Game>("join", request)
-      .then(response => { this.game = response; this.router.navigate(['/playfield']); })
+    this.connection.invoke<JoinResponse>("join", request)
+      .then(response => {
+        console.debug(response);
+        this.game = response.game;
+        this.cards = response.cards;
+        this.router.navigate(['/playfield']);      
+      })
       .catch(error => { console.error(error); result = error.ToString; });
     
     return result;
@@ -92,46 +101,61 @@ export class GameService {
     var result: string = null;
 
     request.uuid = this.uuid;
-    this.connection.invoke<Game>("create", request)
-      .then(response => { this.game = response; this.router.navigate(['/playfield']); })
+    this.connection.invoke<CreateResponse>("create", request)
+      .then(response => {
+        console.debug(response);
+        this.game = response.game;
+        this.cards = response.cards;
+        this.router.navigate(['/playfield']);
+      })
       .catch(error => { console.error(error); result = error.ToString; });
     return result;
   }
 
-  estimate(card: string) {
+  estimate(index: number) {
     var request = new EstimateRequest();
-    request.card = card;
+    request.index = index;
     request.uuid = this.uuid;
     request.teamName = this.teamName;
     
     this.connection.invoke("estimate", request)
       .then(() => {
-        this.me.lastEstimation = card;
-        this.setGameStatusAfterEstimation();
+        var estimation = new Estimation();
+        estimation.uuid = this.uuid;
+        estimation.index = index;
+        this.setEstimation(estimation);
       })
       .catch(error => { console.error(error);  });
   }
 
-  onjoined(participant: Participant): void {
-    console.debug("joined", participant);
-    this.game.allParticipants.push(participant);
+  onjoined(message: Participant): void {
+    console.debug("joined", message);
+    this.game.participants.push(message);
   }
 
-  onestimated(participant: Participant): void {
-    console.debug("estimated", participant);
-    var theoneweneed = this.game.allParticipants.filter(p => p.uuid == participant.uuid)[0];
-    console.debug(theoneweneed);
-    this.game.allParticipants.filter(p => p.uuid == participant.uuid)[0].lastEstimation = participant.lastEstimation;
-    this.setGameStatusAfterEstimation();
+  onestimated(message: Estimation): void {
+    console.debug("estimated", message);
+    this.setEstimation(message);
   }
 
   // set gamestatus after estimation
   setGameStatusAfterEstimation(): void {
-    if (this.game.allParticipants.filter(p => p.lastEstimation == "").length == 0) {
+    if (this.game.participants.length == this.game.estimations.length) {
       this.gameStatus = EGameStatus.Revealed;
     }
     else {
       this.gameStatus = EGameStatus.EstimationGiven;
     }
+  }
+
+  setEstimation(newEstimation: Estimation): void {
+    var estimation = this.game.estimations.filter(f => f.uuid == newEstimation.uuid)[0];
+    if (estimation == null) {
+      this.game.estimations.push(newEstimation);
+    }
+    else {
+      estimation.index = newEstimation.index;
+    }
+    this.setGameStatusAfterEstimation();
   }
 }

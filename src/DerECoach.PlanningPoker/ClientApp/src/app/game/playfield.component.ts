@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
-
 import { GameService } from '../core/services/game.service';
 import { Participant } from '../core/domain/participant';
-import { PokerCard } from '../core/domain/poker-card';
+import { Card } from '../core/domain/card';
 import { EGameStatus } from '../core/domain/enum-game-status';
+import { EstimationModel } from '../core/domain/estimation-model';
 
 @Component({
   selector: 'playfield',
@@ -12,8 +12,6 @@ import { EGameStatus } from '../core/domain/enum-game-status';
 })
 
 export class PlayfieldComponent {
-
-  private arrayOfCards: Array<PokerCard>;
 
   get teamName(): string {
     return this.gameService.teamName;
@@ -26,7 +24,7 @@ export class PlayfieldComponent {
   get developerScreenNames(): Array<string> {
 
     var result = new Array<string>();
-    for (let p of this.gameService.participants.filter(p => p.isScrumMaster == false)) {
+    for (let p of this.gameService.participants.filter(p => p.scrumMaster == false)) {
       if (this.gameService.isMe(p)) {
         result.push(p.screenName + " (me)");
       }
@@ -50,8 +48,8 @@ export class PlayfieldComponent {
     }
   }
 
-  get availableCards(): Array<PokerCard> {
-    return this.arrayOfCards;
+  get availableCards(): Array<Card> {
+    return this.gameService.cards;
   }
   
   get isShowCards(): boolean {
@@ -65,23 +63,29 @@ export class PlayfieldComponent {
       this.gameService.gameStatus == EGameStatus.Revealed;
   }
 
-  get estimations(): Array<Participant> {
-    var result = new Array<Participant>();
-    this.gameService.participants
-      .filter(p => p.lastEstimation != "")
-      .forEach(fe => {
-        var estimation = new Participant();
-        estimation.screenName = fe.screenName;
+  get estimations(): Array<EstimationModel> {
+    var result = new Array<EstimationModel>();
+    this.gameService.estimations
+      .sort((p1, p2) => {
         if (this.gameService.gameStatus == EGameStatus.Revealed) {
-          estimation.lastEstimation = fe.lastEstimation;
+          if (p1.index > p2.index) {
+            return 1;
+          }
+          if (p1.index < p2.index) {
+            return -1;
+          }
+          return 0;
         }
-        else {
-          if (fe.uuid == this.gameService.me.uuid)
-            estimation.lastEstimation = fe.lastEstimation;
-          else
-            estimation.lastEstimation = "";
+      })
+      .forEach(fe => {
+        var model = new EstimationModel();
+        var participant = this.gameService.participants.filter(p => p.uuid == fe.uuid)[0];
+        model.screenName = participant.screenName;
+        if (this.gameService.gameStatus == EGameStatus.Revealed || fe.uuid == this.gameService.me.uuid) {
+          var card = this.gameService.cardByIndex(fe.index);
+          model.label = card.label;
         }
-        result.push(estimation);
+        result.push(model);
       });
     return result;
   }
@@ -90,72 +94,11 @@ export class PlayfieldComponent {
     return this.gameService.gameStatus == EGameStatus.Revealed;
   }
 
-  estimate(card: string) {
-    this.gameService.estimate(card);
+  estimate(index: number) {
+    this.gameService.estimate(index);
   }
-
+  
   constructor(private gameService: GameService) {
-
-    this.gameService = gameService;
-    this.fillArrayOfCards();
-  }
-
-  fillArrayOfCards(): void {
-    this.arrayOfCards = new Array<PokerCard>(14);
-    var card = new PokerCard();
-    card.label = "0";
-    this.arrayOfCards[0] = card;
-
-    card = new PokerCard();
-    card.label = "½";
-    this.arrayOfCards[1] = card;
-
-    card = new PokerCard();
-    card.label = "1";
-    this.arrayOfCards[2] = card;
-
-    card = new PokerCard();
-    card.label = "2";
-    this.arrayOfCards[3] = card;
-
-    card = new PokerCard();
-    card.label = "3";
-    this.arrayOfCards[4] = card;
-
-    card = new PokerCard();
-    card.label = "5";
-    this.arrayOfCards[5] = card;
-
-    card = new PokerCard();
-    card.label = "8";
-    this.arrayOfCards[6] = card;
-
-    card = new PokerCard();
-    card.label = "13";
-    this.arrayOfCards[7] = card;
-
-    card = new PokerCard();
-    card.label = "20";
-    this.arrayOfCards[8] = card;
-
-    card = new PokerCard();
-    card.label = "40";
-    this.arrayOfCards[9] = card;
-
-    card = new PokerCard();
-    card.label = "100";
-    this.arrayOfCards[10] = card;
-
-    card = new PokerCard();
-    card.label = "∞";
-    this.arrayOfCards[11] = card;
-
-    card = new PokerCard();
-    card.label = "?";
-    this.arrayOfCards[12] = card;
-
-    card = new PokerCard();
-    card.label = "K";
-    this.arrayOfCards[13] = card;
+    this.gameService = gameService;  
   }
 }

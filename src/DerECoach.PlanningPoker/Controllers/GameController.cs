@@ -1,7 +1,5 @@
-﻿using DerECoach.PlanningPoker.Core.Domain;
-using DerECoach.PlanningPoker.Core.Requests;
-using DerECoach.PlanningPoker.Core.Services;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+
 
 namespace DerECoach.PlanningPoker.Controllers
 {

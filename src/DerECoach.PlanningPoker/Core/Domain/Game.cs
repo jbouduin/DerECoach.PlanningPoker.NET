@@ -17,7 +17,8 @@ namespace DerECoach.PlanningPoker.Core.Domain
 
         #region public properties ---------------------------------------------
         public string TeamName { get; private set; }        
-        public IList<Participant> AllParticipants { get; } = new List<Participant>();
+        public IList<Participant> Participants { get; } = new List<Participant>();
+        public IList<Estimation> Estimations { get; } = new List<Estimation>();
         #endregion
 
         #region public methods ------------------------------------------------
@@ -26,7 +27,7 @@ namespace DerECoach.PlanningPoker.Core.Domain
             try
             {
                 //readerWriterLock.AcquireReaderLock(READ_LOCK_TIMEOUT);
-                return AllParticipants.Any(a => a.ScreenName.ToLower().Equals(screenName.ToLower()));
+                return Participants.Any(a => a.ScreenName.ToLower().Equals(screenName.ToLower()));
             }
             finally
             {
@@ -49,7 +50,7 @@ namespace DerECoach.PlanningPoker.Core.Domain
                 try
                 {
                     //readerWriterLock.AcquireWriterLock(WRITE_LOCK_TIMEOUT);
-                    AllParticipants.Add(newParticipant);
+                    Participants.Add(newParticipant);
                 }
                 finally
                 {
@@ -68,7 +69,7 @@ namespace DerECoach.PlanningPoker.Core.Domain
 
         public Participant GetParticipant(string uuid)
         {
-            return AllParticipants.FirstOrDefault(fod => fod.Uuid == uuid);
+            return Participants.FirstOrDefault(fod => fod.Uuid == uuid);
         }
 
         public async Task<Participant> GetParticipantAsync(string uuid)
@@ -76,6 +77,33 @@ namespace DerECoach.PlanningPoker.Core.Domain
             return await Task.Run(() =>
             {
                 return GetParticipant(uuid);
+            });
+        }
+
+        public Estimation Estimate(string uuid, int index)
+        {
+            var result = Estimations.FirstOrDefault(fod => fod.Uuid == uuid);
+            if (result != null)
+            {
+                result.Index = index;
+            }
+            else
+            {
+                result = new Estimation
+                {
+                    Uuid = uuid,
+                    Index = index
+                };
+                Estimations.Add(result);
+            }
+            return result;           
+        }
+
+        public async Task<Estimation> EstimateAsync(string uuid, int index)
+        {
+            return await Task.Run(() =>
+            {
+                return Estimate(uuid, index);
             });
         }
         #endregion
