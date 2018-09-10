@@ -11,22 +11,19 @@ import { CreateRequest } from '../core/requests/create-request';
 
 export class CreateComponent {
 
-  private _gameService: GameService;
+  private teamNameLabel = "Team name";
+  private scrumMasterLabel = "Scrum master name";
+  private sendButtonCaption = "Create team";
 
-  private _teamNameLabel = "Team name";
-  private _scrumMasterLabel = "Scrum master name";
-  private _sendButtonCaption = "Create team";
-
-  private _errorText: string;
-  private _scrumMaster: string;
-  private _teamName: string;
-  private _request = new CreateRequest();
+  private errorText: string;
+  private scrumMaster: string;
+  private teamName: string;
+  private request = new CreateRequest();
   
-  constructor(gameService: GameService) {
-    this._gameService = gameService;
+  constructor(private gameService: GameService) {  
   }
 
   create(): void {
-    this._errorText = this._gameService.create(this._request);    
+    this.errorText = this.gameService.create(this.request);    
   }
 }

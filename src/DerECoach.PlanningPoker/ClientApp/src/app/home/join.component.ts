@@ -10,21 +10,20 @@ import { JoinRequest } from '../core/requests/join-request';
 })
 export class JoinComponent {
 
-  private _gameService: GameService;  
-  private _teamNameLabel = "Team name";
-  private _screenNameLabel = "Participant name";
-  private _sendButtonCaption = "Join team";
-
-  private _errorText: string;
-  private _screenName: string;
-  private _teamName: string;
-  private _request = new JoinRequest();
   
-  constructor(gameService: GameService) {
-    this._gameService = gameService;  
+  private teamNameLabel = "Team name";
+  private screenNameLabel = "Participant name";
+  private sendButtonCaption = "Join team";
+
+  private errorText: string;
+  private screenName: string;
+  private teamName: string;
+  private request = new JoinRequest();
+  
+  constructor(private gameService: GameService) {
   }
 
   join(): void {        
-    this._errorText = this._gameService.join(this._request);
+    this.errorText = this.gameService.join(this.request);
   }
 }

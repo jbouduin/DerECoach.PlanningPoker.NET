@@ -1,6 +1,5 @@
 export enum EGameStatus {
   None,
-  Started,
-  //EstimationGiven,
+  Started,  
   Revealed
 }

@@ -71,13 +71,13 @@ export class GameService {
     if (this.game != null)
       return;
 
-    var _loadedGame: any = localStorage.getItem("current_game");
-    if (_loadedGame == null) {
+    var loadedGame: any = localStorage.getItem("current_game");
+    if (loadedGame == null) {
       console.debug("no game in storage");
       return;
     }
 
-    this.game = JSON.parse(_loadedGame);
+    this.game = JSON.parse(loadedGame);
     
   }
   
