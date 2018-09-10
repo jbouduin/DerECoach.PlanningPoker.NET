@@ -63,8 +63,9 @@ export class GameService {
   constructor(private router: Router) {
     
     this.connection.start().catch(err => console.log(err));
-    this.connection.on("joined", participant => this.onjoined(participant));
-    this.connection.on("estimated", participant => this.onestimated(participant));
+    this.connection.on("joined", message => this.onjoined(message));
+    this.connection.on("estimated", message => this.onestimated(message));
+    this.connection.on("started", () => this.onstarted());
     console.debug("creating gameservice");
     console.debug(this.uuid);
     if (this.game != null)
@@ -128,6 +129,15 @@ export class GameService {
       .catch(error => { console.error(error);  });
   }
 
+  startGame() {
+    this.connection.invoke("start", this.teamName)
+      .then(() => {
+        this.startEstimating();
+      })
+      .catch(error => { console.error(error); });
+    
+  }
+
   onjoined(message: Participant): void {
     console.debug("joined", message);
     this.game.participants.push(message);
@@ -138,14 +148,17 @@ export class GameService {
     this.setEstimation(message);
   }
 
+  onstarted(): void {
+    this.startEstimating();
+  }
+
   // set gamestatus after estimation
   setGameStatusAfterEstimation(): void {
-    if (this.game.participants.length == this.game.estimations.length) {
+    console.debug("setGameStatusAfterEstimation ", this.game.participants.filter(f => f.waiting == false).length, this.game.estimations.length);
+    if (this.game.participants.filter(f => f.waiting == false).length == this.game.estimations.length) {
       this.gameStatus = EGameStatus.Revealed;
     }
-    else {
-      this.gameStatus = EGameStatus.EstimationGiven;
-    }
+    
   }
 
   setEstimation(newEstimation: Estimation): void {
@@ -157,5 +170,13 @@ export class GameService {
       estimation.index = newEstimation.index;
     }
     this.setGameStatusAfterEstimation();
+  }
+
+  startEstimating(): void {
+    this.game.estimations = new Array<Estimation>();
+    this.gameStatus = EGameStatus.Started;
+    this.participants.forEach(fe => {
+      fe.waiting = false;
+    });
   }
 }

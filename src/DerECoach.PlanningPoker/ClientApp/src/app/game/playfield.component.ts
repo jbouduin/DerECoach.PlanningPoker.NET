@@ -54,13 +54,18 @@ export class PlayfieldComponent {
   
   get isShowCards(): boolean {
     return this.gameService.gameStatus != EGameStatus.None &&
-      this.gameService.gameStatus != EGameStatus.Revealed      
+      this.gameService.gameStatus != EGameStatus.Revealed &&
+      this.gameService.me.waiting == false;
   }
 
   get isShowEstimations(): boolean {
-    return this.gameService.gameStatus == EGameStatus.Started ||
-      this.gameService.gameStatus == EGameStatus.EstimationGiven ||
-      this.gameService.gameStatus == EGameStatus.Revealed;
+    return this.gameService.gameStatus == EGameStatus.Started ||      
+      this.gameService.gameStatus == EGameStatus.Revealed ||
+      this.gameService.me.waiting == true;
+  }
+
+  get canStartGame(): boolean {
+    return this.gameService.isScrumMasterMe();
   }
 
   get estimations(): Array<EstimationModel> {
@@ -97,7 +102,11 @@ export class PlayfieldComponent {
   estimate(index: number) {
     this.gameService.estimate(index);
   }
-  
+
+  startGame() {
+    this.gameService.startGame();
+  }
+
   constructor(private gameService: GameService) {
     this.gameService = gameService;  
   }

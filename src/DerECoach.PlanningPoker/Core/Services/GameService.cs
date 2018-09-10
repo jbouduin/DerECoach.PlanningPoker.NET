@@ -86,6 +86,19 @@ namespace DerECoach.PlanningPoker.Core.Services
                 return CreateGame(request);
             });
         }
+
+        public void StartGame(string teamName)
+        {
+            _games[teamName].StartGame();
+        }
+
+        public async Task StartGameAsync(string teamName)
+        {
+            await Task.Run(() =>
+            {
+                StartGame(teamName);
+            });
+        }
         #endregion
 
         #region methods estimation related ------------------------------------

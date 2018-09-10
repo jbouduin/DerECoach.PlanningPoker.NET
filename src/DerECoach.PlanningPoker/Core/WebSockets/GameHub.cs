@@ -39,6 +39,11 @@ namespace DerECoach.PlanningPoker.Core.WebSockets
             await Clients.Group(teamName).SendAsync("Send", $"{Context.ConnectionId} has left the group {teamName}.");
         }
 
+        public async Task Start(string teamName)
+        {
+            await GameService.GetInstance().StartGameAsync(teamName);
+            await Clients.GroupExcept(teamName, Context.ConnectionId).SendAsync("started");
+        }
         #endregion
 
         #region estimations related -------------------------------------------

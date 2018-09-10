@@ -10,6 +10,7 @@ namespace DerECoach.PlanningPoker.Core.Domain
         public string ScreenName { get; private set; }        
         public string Uuid { get; private set; }
         public bool ScrumMaster { get; private set; }
+        public bool Waiting { get; set; }
         #endregion
 
         #region constructor ---------------------------------------------------
@@ -24,8 +25,9 @@ namespace DerECoach.PlanningPoker.Core.Domain
             return new Participant
             {
                 ScreenName = screenName,
-                Uuid = uuid,                
-                ScrumMaster = isScrumMaster
+                Uuid = uuid,
+                ScrumMaster = isScrumMaster,
+                Waiting = true
             };
         }
         #endregion

@@ -17,7 +17,7 @@ namespace DerECoach.PlanningPoker.Core.Domain
 
         #region public properties ---------------------------------------------
         public string TeamName { get; private set; }        
-        public IList<Participant> Participants { get; } = new List<Participant>();
+        public List<Participant> Participants { get; } = new List<Participant>();
         public IList<Estimation> Estimations { get; } = new List<Estimation>();
         #endregion
 
@@ -105,6 +105,11 @@ namespace DerECoach.PlanningPoker.Core.Domain
             {
                 return Estimate(uuid, index);
             });
+        }
+
+        public void StartGame()
+        {
+            Participants.ForEach(fe => fe.Waiting = false);
         }
         #endregion
 
