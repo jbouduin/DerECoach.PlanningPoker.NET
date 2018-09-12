@@ -35,28 +35,42 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="ClientApp\src\app\components\backdrop\backdrop.component.ts" />
+    <None Remove="ClientApp\src\app\components\dialog.module.ts" />
+    <None Remove="ClientApp\src\app\components\message\message.component.ts" />
+    <None Remove="ClientApp\src\app\core.module.ts" />
     <None Remove="ClientApp\src\app\core\create-request.ts" />
     <None Remove="ClientApp\src\app\core\domain\card.ts" />
-    <None Remove="ClientApp\src\app\core\domain\enum-game-status.ts" />
     <None Remove="ClientApp\src\app\core\domain\estimation-model.ts" />
     <None Remove="ClientApp\src\app\core\domain\estimation.ts" />
+    <None Remove="ClientApp\src\app\core\domain\game-status.enum.ts" />
+    <None Remove="ClientApp\src\app\core\domain\message-model.ts" />
+    <None Remove="ClientApp\src\app\core\domain\message-type.enum.ts" />
     <None Remove="ClientApp\src\app\core\game-participant.ts" />
     <None Remove="ClientApp\src\app\core\game.ts" />
     <None Remove="ClientApp\src\app\core\join-request.ts" />
     <None Remove="ClientApp\src\app\core\requests\estimate-request.ts" />
     <None Remove="ClientApp\src\app\core\responses\create-response.ts" />
     <None Remove="ClientApp\src\app\core\responses\join-response.ts" />
+    <None Remove="ClientApp\src\app\core\services\dialog.service.ts" />
     <None Remove="ClientApp\src\app\core\services\game.service.ts" />
+    <None Remove="ClientApp\src\app\core\services\message.service.ts" />
     <None Remove="ClientApp\src\app\game\playfield.component.ts" />
     <None Remove="ClientApp\src\app\home\create.component.ts" />
     <None Remove="ClientApp\src\app\home\join.component.ts" />
   </ItemGroup>
 
   <ItemGroup>
-    <TypeScriptCompile Include="ClientApp\src\app\core\domain\enum-game-status.ts" />
-    <TypeScriptCompile Include="ClientApp\src\app\core\domain\estimation-model.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\components\backdrop\backdrop.component.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\components\dialog.module.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\components\message\message.component.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\core.module.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\core\domain\game-status.enum.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\components\models\estimation.model.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\core\domain\message-type.enum.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\core\domain\estimation.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\core\domain\card.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\components\models\message-model.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\core\requests\create-request.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\core\requests\estimate-request.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\core\requests\join-request.ts" />
@@ -64,14 +78,20 @@
     <TypeScriptCompile Include="ClientApp\src\app\core\domain\participant.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\core\responses\create-response.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\core\responses\join-response.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\core\services\dialog.service.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\core\services\game.service.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\components\dialog\dialog.component.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\components\models\dialog-active.model.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\components\models\dialog-content-ref.model.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\components\models\dialog-options.model.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\components\models\dialog-ref.model.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\core\services\message.service.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\game\playfield.component.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\home\create.component.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\home\join.component.ts" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="ClientApp\src\app\core\messages\" />
     <Folder Include="ClientApp\src\images\" />
     <Folder Include="Core\Messages\" />
   </ItemGroup>

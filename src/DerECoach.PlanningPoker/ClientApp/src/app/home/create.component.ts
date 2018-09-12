@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 
 import { GameService } from '../core/services/game.service';
+import { MessageService } from '../core/services/message.service';
 import { CreateRequest } from '../core/requests/create-request';
 
 
@@ -20,10 +21,10 @@ export class CreateComponent {
   private teamName: string;
   private request = new CreateRequest();
   
-  constructor(private gameService: GameService) {  
+  constructor(private gameService: GameService) {    
   }
 
   create(): void {
     this.errorText = this.gameService.create(this.request);    
-  }
+  }  
 }

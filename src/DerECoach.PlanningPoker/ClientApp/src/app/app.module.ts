@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
 
-import { GameService } from './core/services/game.service';
+import * as Core from './core.module';
 
 import { AppComponent } from './app.component';
 import { HeaderComponent } from './header/header.component';
@@ -24,6 +24,9 @@ import { PlayfieldComponent } from './game/playfield.component';
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
+    Core.DialogModule.forRoot(),
+    Core.GameModule.forRoot(),
+    Core.MessageModule.forRoot(),
     HttpClientModule,
     FormsModule,    
     RouterModule.forRoot([
@@ -31,8 +34,7 @@ import { PlayfieldComponent } from './game/playfield.component';
       { path: 'playfield', component: PlayfieldComponent }      
     ])
   ],
-  providers: [
-    GameService
+  providers: [    
   ],
   bootstrap: [AppComponent]
 })

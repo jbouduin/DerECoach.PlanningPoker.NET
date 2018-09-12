@@ -2,8 +2,8 @@ import { Component } from '@angular/core';
 import { GameService } from '../core/services/game.service';
 import { Participant } from '../core/domain/participant';
 import { Card } from '../core/domain/card';
-import { EGameStatus } from '../core/domain/enum-game-status';
-import { EstimationModel } from '../core/domain/estimation-model';
+import { GameStatus } from '../core/domain/game-status.enum';
+import { EstimationModel } from '../components/models/estimation.model';
 
 @Component({
   selector: 'playfield',
@@ -53,14 +53,14 @@ export class PlayfieldComponent {
   }
   
   get isShowCards(): boolean {
-    return this.gameService.gameStatus != EGameStatus.None &&
-      this.gameService.gameStatus != EGameStatus.Revealed &&
+    return this.gameService.gameStatus != GameStatus.None &&
+      this.gameService.gameStatus != GameStatus.Revealed &&
       this.gameService.me.waiting == false;
   }
 
   get isShowEstimations(): boolean {
-    return this.gameService.gameStatus == EGameStatus.Started ||      
-      this.gameService.gameStatus == EGameStatus.Revealed ||
+    return this.gameService.gameStatus == GameStatus.Started ||      
+      this.gameService.gameStatus == GameStatus.Revealed ||
       this.gameService.me.waiting == true;
   }
 
@@ -72,7 +72,7 @@ export class PlayfieldComponent {
     var result = new Array<EstimationModel>();
     this.gameService.estimations
       .sort((p1, p2) => {
-        if (this.gameService.gameStatus == EGameStatus.Revealed) {
+        if (this.gameService.gameStatus == GameStatus.Revealed) {
           if (p1.index > p2.index) {
             return 1;
           }
@@ -86,7 +86,7 @@ export class PlayfieldComponent {
         var model = new EstimationModel();
         var participant = this.gameService.participants.filter(p => p.uuid == fe.uuid)[0];
         model.screenName = participant.screenName;
-        if (this.gameService.gameStatus == EGameStatus.Revealed || fe.uuid == this.gameService.me.uuid) {
+        if (this.gameService.gameStatus == GameStatus.Revealed || fe.uuid == this.gameService.me.uuid) {
           var card = this.gameService.cardByIndex(fe.index);
           model.label = card.label;
         }
@@ -96,7 +96,7 @@ export class PlayfieldComponent {
   }
 
   get showEstimationValues(): boolean {
-    return this.gameService.gameStatus == EGameStatus.Revealed;
+    return this.gameService.gameStatus == GameStatus.Revealed;
   }
 
   estimate(index: number) {

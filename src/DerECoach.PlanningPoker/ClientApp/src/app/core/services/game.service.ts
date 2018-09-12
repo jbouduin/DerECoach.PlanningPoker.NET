@@ -6,7 +6,7 @@ import { Participant } from '../domain/participant';
 import { JoinRequest } from '../requests/join-request';
 import { CreateRequest } from '../requests/create-request';
 import { EstimateRequest } from '../requests/estimate-request';
-import { EGameStatus } from '../domain/enum-game-status';
+import { GameStatus } from '../domain/game-status.enum';
 import * as signalR from '@aspnet/signalr';
 import { Card } from '../domain/card';
 import { JoinResponse } from '../responses/join-response';
@@ -21,7 +21,7 @@ export class GameService {
   private game: Game;  
   private connection = new signalR.HubConnectionBuilder().withUrl("/game").build();
 
-  public gameStatus: EGameStatus = EGameStatus.None;
+  public gameStatus: GameStatus = GameStatus.None;
   public cards: Array<Card>;
 
   get isInGame(): boolean {
@@ -156,7 +156,7 @@ export class GameService {
   setGameStatusAfterEstimation(): void {
     console.debug("setGameStatusAfterEstimation ", this.game.participants.filter(f => f.waiting == false).length, this.game.estimations.length);
     if (this.game.participants.filter(f => f.waiting == false).length == this.game.estimations.length) {
-      this.gameStatus = EGameStatus.Revealed;
+      this.gameStatus = GameStatus.Revealed;
     }
     
   }
@@ -174,7 +174,7 @@ export class GameService {
 
   startEstimating(): void {
     this.game.estimations = new Array<Estimation>();
-    this.gameStatus = EGameStatus.Started;
+    this.gameStatus = GameStatus.Started;
     this.participants.forEach(fe => {
       fe.waiting = false;
     });
