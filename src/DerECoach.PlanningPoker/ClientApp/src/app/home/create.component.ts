@@ -20,10 +20,10 @@ export class CreateComponent {
   private teamName: string;
   private request = new CreateRequest();
   
-  constructor(private gameService: GameService) {  
+  constructor(private gameService: GameService) {    
   }
 
   create(): void {
     this.errorText = this.gameService.create(this.request);    
-  }
+  }  
 }

@@ -1,4 +1,4 @@
-export enum EGameStatus {
+export enum GameStatus {
   None,
   Started,  
   Revealed

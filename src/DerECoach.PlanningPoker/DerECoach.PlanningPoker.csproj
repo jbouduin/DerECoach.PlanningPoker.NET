@@ -35,15 +35,19 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="ClientApp\src\app\core.module.ts" />
     <None Remove="ClientApp\src\app\core\create-request.ts" />
     <None Remove="ClientApp\src\app\core\domain\card.ts" />
-    <None Remove="ClientApp\src\app\core\domain\enum-game-status.ts" />
     <None Remove="ClientApp\src\app\core\domain\estimation-model.ts" />
     <None Remove="ClientApp\src\app\core\domain\estimation.ts" />
+    <None Remove="ClientApp\src\app\core\domain\game-status.enum.ts" />
+    <None Remove="ClientApp\src\app\core\domain\message-model.ts" />
     <None Remove="ClientApp\src\app\core\game-participant.ts" />
     <None Remove="ClientApp\src\app\core\game.ts" />
     <None Remove="ClientApp\src\app\core\join-request.ts" />
+    <None Remove="ClientApp\src\app\core\requests\end-request.ts" />
     <None Remove="ClientApp\src\app\core\requests\estimate-request.ts" />
+    <None Remove="ClientApp\src\app\core\requests\leave-request.ts" />
     <None Remove="ClientApp\src\app\core\responses\create-response.ts" />
     <None Remove="ClientApp\src\app\core\responses\join-response.ts" />
     <None Remove="ClientApp\src\app\core\services\game.service.ts" />
@@ -53,8 +57,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <TypeScriptCompile Include="ClientApp\src\app\core\domain\enum-game-status.ts" />
-    <TypeScriptCompile Include="ClientApp\src\app\core\domain\estimation-model.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\core.module.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\core\domain\game-status.enum.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\components\models\estimation.model.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\core\domain\estimation.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\core\domain\card.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\core\requests\create-request.ts" />
@@ -62,6 +67,8 @@
     <TypeScriptCompile Include="ClientApp\src\app\core\requests\join-request.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\core\domain\game.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\core\domain\participant.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\core\requests\end-request.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\core\requests\leave-request.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\core\responses\create-response.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\core\responses\join-response.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\core\services\game.service.ts" />
@@ -71,12 +78,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="ClientApp\src\app\core\messages\" />
     <Folder Include="ClientApp\src\images\" />
     <Folder Include="Core\Messages\" />
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="ClientApp\src\app\core\requests\end-request.js">
+      <DependentUpon>end-request.ts</DependentUpon>
+    </None>
     <None Update="ClientApp\src\app\core\responses\create-response.js">
       <DependentUpon>create-response.ts</DependentUpon>
     </None>

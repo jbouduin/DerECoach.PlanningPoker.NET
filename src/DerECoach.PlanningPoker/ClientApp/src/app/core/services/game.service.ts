@@ -1,18 +1,20 @@
-import { Injectable, Inject } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { Game } from '../domain/game';
 import { v4 as uuid } from 'uuid';
+
+import { Game } from '../domain/game';
 import { Participant } from '../domain/participant';
 import { JoinRequest } from '../requests/join-request';
 import { CreateRequest } from '../requests/create-request';
 import { EstimateRequest } from '../requests/estimate-request';
-import { EGameStatus } from '../domain/enum-game-status';
+import { EndRequest } from '../requests/end-request';
+import { GameStatus } from '../domain/game-status.enum';
 import * as signalR from '@aspnet/signalr';
 import { Card } from '../domain/card';
 import { JoinResponse } from '../responses/join-response';
 import { CreateResponse } from '../responses/create-response';
 import { Estimation } from '../domain/estimation';
-
+import { LeaveRequest } from '../requests/leave-request';
 
 @Injectable()
 export class GameService {
@@ -21,7 +23,7 @@ export class GameService {
   private game: Game;  
   private connection = new signalR.HubConnectionBuilder().withUrl("/game").build();
 
-  public gameStatus: EGameStatus = EGameStatus.None;
+  public gameStatus: GameStatus = GameStatus.None;
   public cards: Array<Card>;
 
   get isInGame(): boolean {
@@ -66,8 +68,8 @@ export class GameService {
     this.connection.on("joined", message => this.onjoined(message));
     this.connection.on("estimated", message => this.onestimated(message));
     this.connection.on("started", () => this.onstarted());
-    console.debug("creating gameservice");
-    console.debug(this.uuid);
+    this.connection.on("left", message => this.onleft(message));
+    this.connection.on("ended", () => this.onended());        
     if (this.game != null)
       return;
 
@@ -84,7 +86,7 @@ export class GameService {
   join(request: JoinRequest): string {
 
     var result: string = null;
-    request.uuid = this.uuid;
+    request.uuid = this.uuid;    
     this.connection.invoke<JoinResponse>("join", request)
       .then(response => {
         console.debug(response);
@@ -96,7 +98,7 @@ export class GameService {
     
     return result;
   }
-
+    
   create(request: CreateRequest): string {
 
     var result: string = null;
@@ -138,10 +140,56 @@ export class GameService {
     
   }
 
+  leave(): string {
+    var result: string = null;
+    var request = new LeaveRequest();
+    request.teamName = this.game.teamName;
+    request.uuid = this.uuid;    
+
+    this.connection.invoke("leave", request)
+      .then(() => {        
+        this.game = null;        
+        this.router.navigate(['']);
+      })
+      .catch(error => {
+        console.error(error);
+        result = error.ToString;
+      });
+
+    return result;
+  }
+
+  end(): string {
+    let result: string = null;
+    let request = new EndRequest();
+    request.teamName = this.game.teamName;
+    request.uuid = this.uuid;
+
+    this.connection.invoke("end", request)
+      .then(() => {
+        this.game = null;
+        this.router.navigate(['']);
+      })
+      .catch(error => {
+        console.error(error);
+        result = error.ToString;
+      });
+
+    return result;
+  }
+
   onjoined(message: Participant): void {
     console.debug("joined", message);
     this.game.participants.push(message);
   }
+
+  onleft(message: Participant): void {
+    console.debug("left", message);
+    var theOne = this.game.participants.filter(f => f.uuid == message.uuid)[0];
+    let index = this.game.participants.indexOf(theOne)
+    this.game.participants.splice(index, 1);
+  }
+
 
   onestimated(message: Estimation): void {
     console.debug("estimated", message);
@@ -152,11 +200,17 @@ export class GameService {
     this.startEstimating();
   }
 
+  onended(): void {
+    this.game = null;
+    alert("The Scrum Master has ended the game");
+    this.router.navigate(['']);
+  }
+
   // set gamestatus after estimation
   setGameStatusAfterEstimation(): void {
     console.debug("setGameStatusAfterEstimation ", this.game.participants.filter(f => f.waiting == false).length, this.game.estimations.length);
     if (this.game.participants.filter(f => f.waiting == false).length == this.game.estimations.length) {
-      this.gameStatus = EGameStatus.Revealed;
+      this.gameStatus = GameStatus.Revealed;
     }
     
   }
@@ -174,7 +228,7 @@ export class GameService {
 
   startEstimating(): void {
     this.game.estimations = new Array<Estimation>();
-    this.gameStatus = EGameStatus.Started;
+    this.gameStatus = GameStatus.Started;
     this.participants.forEach(fe => {
       fe.waiting = false;
     });

@@ -63,6 +63,28 @@ namespace DerECoach.PlanningPoker.Core.Services
             });
         }
 
+        public Participant LeaveGame(LeaveRequest request)
+        {
+            try
+            {
+                //readerWriterLock.AcquireReaderLock(10000);
+                var game = _games[request.TeamName];
+                return game.RemoveParticipant(request.Uuid);
+            }
+            finally
+            {
+                //readerWriterLock.ReleaseReaderLock();
+            }
+        }
+
+        public async Task<Participant> LeaveGameAsync(LeaveRequest request)
+        {
+            return await Task.Run(() =>
+            {
+                return LeaveGame(request);
+            });
+        }
+
         public Game CreateGame(CreateRequest request)
         {
             var result = new Game(request.TeamName);
@@ -97,6 +119,19 @@ namespace DerECoach.PlanningPoker.Core.Services
             await Task.Run(() =>
             {
                 StartGame(teamName);
+            });
+        }
+
+        public void EndGame(EndRequest request)
+        {
+            _games.Remove(request.TeamName);
+        }
+
+        public async Task EndGameAsync(EndRequest request)
+        {
+            await Task.Run(() =>
+            {
+                EndGame(request);
             });
         }
         #endregion

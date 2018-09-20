@@ -32,11 +32,11 @@ namespace DerECoach.PlanningPoker.Core.WebSockets
             return result;
         }
 
-        public async Task Leave(string teamName)
+        public async Task Leave(LeaveRequest leaveRequest)
         {
-            await Groups.RemoveFromGroupAsync(Context.ConnectionId, teamName);
-
-            await Clients.Group(teamName).SendAsync("Send", $"{Context.ConnectionId} has left the group {teamName}.");
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, leaveRequest.TeamName);
+            var participant = GameService.GetInstance().LeaveGame(leaveRequest);
+            await Clients.Group(leaveRequest.TeamName).SendAsync("left", participant);
         }
 
         public async Task Start(string teamName)
@@ -44,11 +44,18 @@ namespace DerECoach.PlanningPoker.Core.WebSockets
             await GameService.GetInstance().StartGameAsync(teamName);
             await Clients.GroupExcept(teamName, Context.ConnectionId).SendAsync("started");
         }
+
+        public async Task End(EndRequest request)
+        {
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, request.TeamName);
+            GameService.GetInstance().EndGame(request);
+            await Clients.Group(request.TeamName).SendAsync("ended");            
+        }
         #endregion
 
         #region estimations related -------------------------------------------
         public async Task Estimate(EstimateRequest request)
-        {
+        {            
             var estimation = await GameService.GetInstance().EstimateAsync(request);            
             await Clients.GroupExcept(request.TeamName, Context.ConnectionId).SendAsync("estimated", estimation);
         }

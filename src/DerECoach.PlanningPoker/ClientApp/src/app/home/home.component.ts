@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewContainerRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { GameService } from '../core/services/game.service';
 
@@ -9,11 +9,13 @@ import { GameService } from '../core/services/game.service';
 
 export class HomeComponent implements OnInit {  
 
-  constructor(public gameService: GameService,
-  public router: Router) { }
+  constructor(private router: Router,
+    private gameService: GameService) {
+  }
 
   ngOnInit() {
     if (this.gameService.isInGame)
       this.router.navigate(['/playfield']);    
   }
+
 }
