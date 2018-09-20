@@ -23,14 +23,17 @@ export class PlayfieldComponent {
 
   get developerScreenNames(): Array<string> {
 
-    var result = new Array<string>();
+    let result = new Array<string>();
     for (let p of this.gameService.participants.filter(p => p.scrumMaster == false)) {
+      let screenName = p.screenName;
+
       if (this.gameService.isMe(p)) {
-        result.push(p.screenName + " (me)");
+        screenName = screenName + " (me)";
       }
-      else {
-        result.push(p.screenName);
+      if (p.waiting) {
+        screenName = screenName + " (waiting)";
       }
+      result.push(screenName);
     }
     return result;
   }
