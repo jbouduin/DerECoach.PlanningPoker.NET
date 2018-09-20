@@ -19,10 +19,13 @@ import { LeaveRequest } from '../requests/leave-request';
 @Injectable()
 export class GameService {
 
+  private readonly gameKey: string = "current_game";
+  private readonly uuidKey: string = "current_uuid";
+
   private uuid: string = uuid();
   private game: Game;  
   private connection = new signalR.HubConnectionBuilder().withUrl("/game").build();
-
+  
   public gameStatus: GameStatus = GameStatus.None;
   public cards: Array<Card>;
 
@@ -70,16 +73,32 @@ export class GameService {
     this.connection.on("started", () => this.onstarted());
     this.connection.on("left", message => this.onleft(message));
     this.connection.on("ended", () => this.onended());        
+
     if (this.game != null)
       return;
 
-    var loadedGame: any = localStorage.getItem("current_game");
+    var loadedGame: any = localStorage.getItem(this.gameKey);
+    this.uuid = localStorage.getItem(this.uuidKey);
+
     if (loadedGame == null) {
       console.debug("no game in storage");
       return;
     }
 
+    if (this.uuid == null) {
+      console.debug("no uuid in storage");
+      this.uuid = uuid();
+      localStorage.setItem(this.uuidKey, this.uuid);
+      return;
+    }
+        
     this.game = JSON.parse(loadedGame);
+    if (this.me == null) {
+      console.debug("not my game");
+      this.game = null;
+      this.uuid = uuid();
+      localStorage.setItem(this.uuidKey, this.uuid);
+    }
     
   }
   
@@ -92,7 +111,8 @@ export class GameService {
         console.debug(response);
         this.game = response.game;
         this.cards = response.cards;
-        this.router.navigate(['/playfield']);      
+        this.router.navigate(['/playfield']);
+        this.saveGame();
       })
       .catch(error => { console.error(error); result = error.ToString; });
     
@@ -110,6 +130,7 @@ export class GameService {
         this.game = response.game;
         this.cards = response.cards;
         this.router.navigate(['/playfield']);
+        this.saveGame();
       })
       .catch(error => { console.error(error); result = error.ToString; });
     return result;
@@ -136,8 +157,7 @@ export class GameService {
       .then(() => {
         this.startEstimating();
       })
-      .catch(error => { console.error(error); });
-    
+      .catch(error => { console.error(error); });    
   }
 
   leave(): string {
@@ -148,7 +168,8 @@ export class GameService {
 
     this.connection.invoke("leave", request)
       .then(() => {        
-        this.game = null;        
+        this.game = null;
+        localStorage.removeItem(this.gameKey);
         this.router.navigate(['']);
       })
       .catch(error => {
@@ -168,6 +189,7 @@ export class GameService {
     this.connection.invoke("end", request)
       .then(() => {
         this.game = null;
+        localStorage.removeItem(this.gameKey);
         this.router.navigate(['']);
       })
       .catch(error => {
@@ -181,6 +203,7 @@ export class GameService {
   onjoined(message: Participant): void {
     console.debug("joined", message);
     this.game.participants.push(message);
+    this.saveGame();
   }
 
   onleft(message: Participant): void {
@@ -188,6 +211,7 @@ export class GameService {
     var theOne = this.game.participants.filter(f => f.uuid == message.uuid)[0];
     let index = this.game.participants.indexOf(theOne)
     this.game.participants.splice(index, 1);
+    this.saveGame();
   }
 
 
@@ -202,6 +226,7 @@ export class GameService {
 
   onended(): void {
     this.game = null;
+    localStorage.removeItem(this.gameKey);
     alert("The Scrum Master has ended the game");
     this.router.navigate(['']);
   }
@@ -224,6 +249,7 @@ export class GameService {
       estimation.index = newEstimation.index;
     }
     this.setGameStatusAfterEstimation();
+    this.saveGame();
   }
 
   startEstimating(): void {
@@ -232,5 +258,10 @@ export class GameService {
     this.participants.forEach(fe => {
       fe.waiting = false;
     });
+    this.saveGame();
+  }
+
+  saveGame(): void {
+    localStorage.setItem(this.gameKey, JSON.stringify(this.game));  
   }
 }
