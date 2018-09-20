@@ -67,6 +67,21 @@ namespace DerECoach.PlanningPoker.Core.Domain
             });
         }
 
+        public Participant RemoveParticipant(string uuid)
+        {
+            var result = GetParticipant(uuid);
+            Participants.Remove(result);
+            return result;
+        }
+
+        public async Task<Participant> RemoveParticipantAsync(string uuid)
+        {
+            return await Task.Run(() =>
+            {
+                return RemoveParticipant(uuid);
+            });
+        }
+
         public Participant GetParticipant(string uuid)
         {
             return Participants.FirstOrDefault(fod => fod.Uuid == uuid);

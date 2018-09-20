@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 
 import { GameService } from '../core/services/game.service';
-import { MessageService } from '../core/services/message.service';
 import { CreateRequest } from '../core/requests/create-request';
 
 
