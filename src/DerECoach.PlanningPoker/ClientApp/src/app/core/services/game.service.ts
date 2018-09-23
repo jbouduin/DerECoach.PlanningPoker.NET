@@ -116,9 +116,12 @@ export class GameService {
       .catch(err => console.log(err));
   }
 
-  join(request: JoinRequest): string {
+  join(teamName: string, screenName: string): string {
 
     let result: string = null;
+    var request = new JoinRequest();
+    request.screenName = screenName;
+    request.teamName = teamName;
     request.uuid = this.uuid;    
     this.connection.invoke<JoinResponse>("join", request)
       .then(response => {
@@ -158,10 +161,12 @@ export class GameService {
     return result;
   }
 
-  create(request: CreateRequest): string {
+  create(teamName: string, scrumMaster: string): string {
 
-    var result: string = null;
-
+    let result: string = null;
+    let request = new CreateRequest();
+    request.teamName = teamName;
+    request.scrumMaster = scrumMaster;
     request.uuid = this.uuid;
     this.connection.invoke<CreateResponse>("create", request)
       .then(response => {
@@ -176,7 +181,7 @@ export class GameService {
   }
 
   estimate(index: number) {
-    var request = new EstimateRequest();
+    let request = new EstimateRequest();
     request.index = index;
     request.uuid = this.uuid;
     request.teamName = this.teamName;
@@ -200,8 +205,8 @@ export class GameService {
   }
 
   leave(): string {
-    var result: string = null;
-    var request = new LeaveRequest();
+    let result: string = null;
+    let request = new LeaveRequest();
     request.teamName = this.game.teamName;
     request.uuid = this.uuid;    
 
