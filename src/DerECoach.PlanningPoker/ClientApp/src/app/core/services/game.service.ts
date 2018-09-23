@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { v4 as uuid } from 'uuid';
+import { ToasterService, Toast } from 'angular2-toaster';
 
 import { Game } from '../domain/game';
 import { Participant } from '../domain/participant';
@@ -70,7 +71,8 @@ export class GameService {
     return false;
   }
 
-  constructor(private router: Router) {
+  constructor(private router: Router,
+    private toasterService: ToasterService) {
     console.debug("in gameservice constructor");
     this.connection = new signalR.HubConnectionBuilder().withUrl("/game").build();
     
@@ -112,7 +114,15 @@ export class GameService {
 
   async initConnection(): Promise<void>{
     await this.connection.start()
-      .then(() => console.log("hub connected"))
+      .then(() => {
+        console.log("hub connected");
+        let toast: Toast = {
+          type: "info",
+          title: "Connected",
+          body: "You are now connected"
+        }
+        this.toasterService.popAsync(toast)
+      })
       .catch(err => console.log(err));
   }
 
@@ -246,6 +256,12 @@ export class GameService {
 
   onjoined(message: Participant): void {
     console.debug("joined", message);
+    let toast: Toast = {
+      type: "info",
+      title: "Joined",
+      body: message.screenName + " joined"
+    }
+    this.toasterService.popAsync(toast)
     this.upsertParticipant(message);
   }
 

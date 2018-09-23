@@ -1,9 +1,10 @@
 import { BrowserModule } from '@angular/platform-browser';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
-
+import { ToasterModule } from 'angular2-toaster';
 import { GameModule } from './core.module';
 
 import { AppComponent } from './app.component';
@@ -24,7 +25,9 @@ import { PlayfieldComponent } from './game/playfield.component';
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
+    BrowserAnimationsModule,
     GameModule.forRoot(),
+    ToasterModule.forRoot(),
     HttpClientModule,
     FormsModule,    
     RouterModule.forRoot([
