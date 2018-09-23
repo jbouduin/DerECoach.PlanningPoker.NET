@@ -22,7 +22,7 @@ namespace DerECoach.PlanningPoker.Core.Domain
         #endregion
 
         #region public methods ------------------------------------------------
-        public bool HasParticipant(string screenName)
+        public bool HasParticipantWithScreenName(string screenName)
         {
             try
             {
@@ -35,17 +35,38 @@ namespace DerECoach.PlanningPoker.Core.Domain
             }
         }
 
-        public async Task<bool> HasParticipantASync(string screenName)
+        public async Task<bool> HasParticipantWithScreenNameAsync(string screenName)
         {
             return await Task.Run(() =>
             {
-                return HasParticipant(screenName);
+                return HasParticipantWithScreenName(screenName);
+            });
+        }
+
+        public bool HasParticipantWithConnectionId(string connectionId)
+        {
+            try
+            {
+                //readerWriterLock.AcquireReaderLock(READ_LOCK_TIMEOUT);
+                return Participants.Any(a => a.HasConnectionId(connectionId));
+            }
+            finally
+            {
+                //readerWriterLock.ReleaseReaderLock();
+            }
+        }
+
+        public async Task<bool> HasParticipantWithConnectionIdAsync(string connectionId)
+        {
+            return await Task.Run(() =>
+            {
+                return HasParticipantWithConnectionId(connectionId);
             });
         }
 
         public void AddParticipant(Participant newParticipant)
         {
-            if (!HasParticipant(newParticipant.ScreenName))
+            if (!HasParticipantWithScreenName(newParticipant.ScreenName))
             {
                 try
                 {
@@ -92,6 +113,32 @@ namespace DerECoach.PlanningPoker.Core.Domain
             return await Task.Run(() =>
             {
                 return GetParticipant(uuid);
+            });
+        }
+
+        public Participant GetParticipantByScreenName(string screenName)
+        {
+            return Participants.FirstOrDefault(fod => fod.ScreenName == screenName);
+        }
+
+        public async Task<Participant> GetParticipantByScreenNameAsync(string screenName)
+        {
+            return await Task.Run(() =>
+            {
+                return GetParticipantByScreenName(screenName);
+            });
+        }
+
+        public Participant GetParticipantByConnectionId(string connectionId)
+        {
+            return Participants.FirstOrDefault(fod => fod.HasConnectionId(connectionId));
+        }
+
+        public async Task<Participant> GetParticipantByConnectionIdAsync(string connectionId)
+        {
+            return await Task.Run(() =>
+            {
+                return GetParticipantByConnectionId(connectionId);
             });
         }
 

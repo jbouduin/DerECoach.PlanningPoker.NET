@@ -1,5 +1,4 @@
-import { Component, OnInit, ViewContainerRef } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { GameService } from '../core/services/game.service';
 
 @Component({
@@ -7,15 +6,27 @@ import { GameService } from '../core/services/game.service';
   templateUrl: './home.component.html',
 })
 
-export class HomeComponent implements OnInit {  
+export class HomeComponent implements AfterViewInit {  
 
-  constructor(private router: Router,
-    private gameService: GameService) {
+  constructor(private gameService: GameService) {
   }
 
-  ngOnInit() {
-    if (this.gameService.isInGame)
-      this.router.navigate(['/playfield']);    
+  ngAfterViewInit() {
+    console.debug("afterviewinit");
+    this.gameService.initConnection().then(() => {
+      if (this.gameService.isInGame) {
+        let tryReenter = confirm("Do you want to rejoin the team '" + this.gameService.teamName + "'?");
+        if (tryReenter == true) {
+          let message = this.gameService.rejoin();
+          if (message != null) {
+            alert(message);
+          }
+        }
+        else {
+          this.gameService.leave();
+        }
+      }
+    });
   }
 
 }

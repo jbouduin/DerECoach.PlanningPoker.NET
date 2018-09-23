@@ -3,4 +3,5 @@ export class Participant {
   uuid: string;
   scrumMaster: boolean;
   waiting: boolean;
+  isConnected: boolean;
 }
