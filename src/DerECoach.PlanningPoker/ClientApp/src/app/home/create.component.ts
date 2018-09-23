@@ -1,8 +1,6 @@
 import { Component } from '@angular/core';
 
 import { GameService } from '../core/services/game.service';
-import { CreateRequest } from '../core/requests/create-request';
-
 
 @Component({
   selector: 'create-component',
@@ -11,19 +9,27 @@ import { CreateRequest } from '../core/requests/create-request';
 
 export class CreateComponent {
 
-  private teamNameLabel = "Team name";
-  private scrumMasterLabel = "Scrum master name";
-  private sendButtonCaption = "Create team";
+  get teamNameLabel(): string {
+    return "Team name";
+  }
 
-  private errorText: string;
-  private scrumMaster: string;
-  private teamName: string;
-  private request = new CreateRequest();
+  get scrumMasterLabel(): string {
+    return "Scrum master name";
+  }
+
+  get sendButtonCaption(): string {
+    return "Create team";
+  }
+
+  public errorText: string;
+  public scrumMasterText: string;
+  public teamNameText: string;
+  
   
   constructor(private gameService: GameService) {    
   }
 
   create(): void {
-    this.errorText = this.gameService.create(this.request);    
+    this.errorText = this.gameService.create(this.teamNameText, this.scrumMasterText);    
   }  
 }

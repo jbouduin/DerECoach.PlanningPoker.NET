@@ -1,8 +1,5 @@
 import { Component } from '@angular/core';
-
 import { GameService } from '../core/services/game.service';
-import { JoinRequest } from '../core/requests/join-request';
-
 
 @Component({
   selector: 'join-component',
@@ -11,19 +8,27 @@ import { JoinRequest } from '../core/requests/join-request';
 export class JoinComponent {
 
   
-  private teamNameLabel = "Team name";
-  private screenNameLabel = "Participant name";
-  private sendButtonCaption = "Join team";
+  get teamNameLabel(): string {
+    return "Team name";
+  }
 
-  private errorText: string;
-  private screenName: string;
-  private teamName: string;
-  private request = new JoinRequest();
+  get screenNameLabel(): string {
+    return "Participant name";
+  }
+
+  get sendButtonCaption(): string {
+    return "Join team";
+  }
+
+  public errorText: string;
+  public screenNameText: string;
+  public teamNameText: string;
+  
   
   constructor(private gameService: GameService) {
   }
 
-  join(): void {        
-    this.errorText = this.gameService.join(this.request);
+  join(): void {
+    this.errorText = this.gameService.join(this.teamNameText, this.screenNameText);
   }
 }
