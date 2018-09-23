@@ -3,6 +3,7 @@ using DerECoach.PlanningPoker.Core.Requests;
 using DerECoach.PlanningPoker.Core.Responses;
 using DerECoach.PlanningPoker.Core.Services;
 using Microsoft.AspNetCore.SignalR;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -12,14 +13,25 @@ namespace DerECoach.PlanningPoker.Core.WebSockets
     {
         #region game related --------------------------------------------------
         public async Task<JoinResponse> Join(JoinRequest request)
-        {
-            var participant = Participant.CreateParticipant(request.ScreenName, request.Uuid);
+        {            
             await Groups.AddToGroupAsync(Context.ConnectionId, request.TeamName);
             var result = new JoinResponse();
-            result.Game = await GameService.GetInstance().JoinGameAsync(request.TeamName, participant);
+            result.Game = await GameService.GetInstance().JoinGameAsync(request, Context.ConnectionId);
             result.Cards = GetCards();
+            var participant = await result.Game.GetParticipantByScreenNameAsync(request.ScreenName);
             await Clients.GroupExcept(request.TeamName, Context.ConnectionId).SendAsync("joined", participant);
             
+            return result;
+        }
+
+        public async Task<JoinResponse> Rejoin(JoinRequest request)
+        {
+            await Groups.AddToGroupAsync(Context.ConnectionId, request.TeamName);
+            var result = new JoinResponse();
+            result.Game = await GameService.GetInstance().RejoinGameAsync(request, Context.ConnectionId);
+            result.Cards = GetCards();
+            var participant = await result.Game.GetParticipantByScreenNameAsync(request.ScreenName);
+            await Clients.GroupExcept(request.TeamName, Context.ConnectionId).SendAsync("rejoined", participant);
             return result;
         }
 
@@ -27,7 +39,7 @@ namespace DerECoach.PlanningPoker.Core.WebSockets
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, request.TeamName);
             var result = new CreateResponse();
-            result.Game = await GameService.GetInstance().CreateGameASync(request);
+            result.Game = await GameService.GetInstance().CreateGameAsync(request, Context.ConnectionId);
             result.Cards = GetCards();
             return result;
         }
@@ -61,7 +73,23 @@ namespace DerECoach.PlanningPoker.Core.WebSockets
         }
         #endregion
 
-        #region helpers -------------------------------------------------------
+        #region overrides -----------------------------------------------------
+        public override Task OnDisconnectedAsync(Exception exception)
+        {
+            return base.OnDisconnectedAsync(exception).ContinueWith((task) => ProcessOnDisconnected(Context.ConnectionId));
+            
+        }
+
+        #endregion
+
+        #region helpers -------------------------------------------------------       
+        private void ProcessOnDisconnected(string connectionId)
+        {            
+            var team = GameService.GetInstance().GetTeamByConnectionId(connectionId);
+            var participant = GameService.GetInstance().OnDisconnected(connectionId);
+            Clients.GroupExcept(team, Context.ConnectionId).SendAsync("disconnected", participant);
+        }
+
         private IList<Card> GetCards()
         {
             var result = new List<Card>

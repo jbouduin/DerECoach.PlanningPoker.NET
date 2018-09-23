@@ -33,6 +33,9 @@ export class PlayfieldComponent {
       if (p.waiting) {
         screenName = screenName + " (waiting)";
       }
+      if (p.isConnected == false) {
+        screenName = screenName + " (disconnected)";
+      }
       result.push(screenName);
     }
     return result;

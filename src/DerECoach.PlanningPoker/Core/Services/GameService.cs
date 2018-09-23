@@ -13,7 +13,8 @@ namespace DerECoach.PlanningPoker.Core.Services
         #endregion
 
         #region private fields ------------------------------------------------
-        private Dictionary<string, Game> _games;
+        private readonly Dictionary<string, Game> _games;
+        private readonly Dictionary<string, string> _connections;
         //private static ReaderWriterLock readerWriterLock = new ReaderWriterLock();
         #endregion
 
@@ -39,30 +40,59 @@ namespace DerECoach.PlanningPoker.Core.Services
            });
         }
 
-        public Game JoinGame(string teamName, Participant participant)
+        public Game JoinGame(JoinRequest request, string connectionId)
         {
             Game result = null;
             try
             {
                 //readerWriterLock.AcquireReaderLock(10000);
-                result = _games[teamName];
-                result.AddParticipant(participant);
+                result = _games[request.TeamName];
+                result.AddParticipant(Participant.CreateParticipant(request.ScreenName, request.Uuid, connectionId));
+                _connections.Add(connectionId, request.TeamName);
+                return result;
             }
             finally
             {
                 //readerWriterLock.ReleaseReaderLock();
             }
-            return result;
+            
         }
 
-        public async Task<Game> JoinGameAsync(string teamName, Participant participant)
+        public async Task<Game> JoinGameAsync(JoinRequest request, string connectionId)
         {
             return await Task.Run(() =>
             {
-                return JoinGame(teamName, participant);
+                return JoinGame(request, connectionId);
             });
         }
 
+        public Game RejoinGame(JoinRequest request, string connectionId)
+        {
+            Game result = null;
+            try
+            {
+                //readerWriterLock.AcquireReaderLock(10000);
+                result = _games[request.TeamName];
+                var participant = result.GetParticipantByScreenName(request.ScreenName);
+                participant.Reconnect(connectionId);
+                _connections.Add(connectionId, request.TeamName);
+                return result;
+            }
+            finally
+            {
+                //readerWriterLock.ReleaseReaderLock();
+            }
+            
+        }
+
+        public async Task<Game> RejoinGameAsync(JoinRequest request, string connectionId)
+        {
+            return await Task.Run(() =>
+            {
+                return RejoinGame(request, connectionId);
+            });
+        }
+        
         public Participant LeaveGame(LeaveRequest request)
         {
             try
@@ -85,14 +115,15 @@ namespace DerECoach.PlanningPoker.Core.Services
             });
         }
 
-        public Game CreateGame(CreateRequest request)
+        public Game CreateGame(CreateRequest request, string connectionId)
         {
             var result = new Game(request.TeamName);
-            result.AddParticipant(Participant.CreateParticipant(request.ScrumMaster, request.Uuid, true));
+            result.AddParticipant(Participant.CreateParticipant(request.ScrumMaster, request.Uuid, connectionId, true));
             try
             {
                 //readerWriterLock.AcquireWriterLock(READ_LOCK_TIMEOUT);
                 _games.Add(request.TeamName, result);
+                _connections.Add(connectionId, request.TeamName);
                 return result;
             }
             finally
@@ -101,11 +132,11 @@ namespace DerECoach.PlanningPoker.Core.Services
             }
         }
 
-        public async Task<Game> CreateGameASync(CreateRequest request)
+        public async Task<Game> CreateGameAsync(CreateRequest request, string connectionId)
         {
             return await Task.Run(() =>
             {
-                return CreateGame(request);
+                return CreateGame(request, connectionId);
             });
         }
 
@@ -163,6 +194,34 @@ namespace DerECoach.PlanningPoker.Core.Services
         }
         #endregion
 
+
+        #region participant related -------------------------------------------
+        public string GetTeamByConnectionId(string connectionId)
+        {
+            _connections.TryGetValue(connectionId, out string result);
+            return result;
+        }
+
+        public Participant OnDisconnected(string connectionId)
+        {
+            _connections.TryGetValue(connectionId, out string team);
+            if (team == null)
+                return null;
+
+            var result = _games[team].GetParticipantByConnectionId(connectionId);
+            result.Disconnect();
+            return result;
+        }
+
+        public async Task<Participant> OnDisconnectedAsync(string connectionId)
+        {
+            return await Task.Run(() =>
+            {
+                return OnDisconnected(connectionId);
+            });
+        }
+        #endregion
+
         #region singleton implementation --------------------------------------
         private static GameService _gameService;
         public static GameService GetInstance()
@@ -173,6 +232,7 @@ namespace DerECoach.PlanningPoker.Core.Services
         private GameService()
         {
             _games = new Dictionary<string, Game>();
+            _connections = new Dictionary<string, string>();
         }
         #endregion
 

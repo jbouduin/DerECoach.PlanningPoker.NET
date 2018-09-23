@@ -23,8 +23,8 @@ export class GameService {
   private readonly uuidKey: string = "current_uuid";
 
   private uuid: string = uuid();
-  private game: Game;  
-  private connection = new signalR.HubConnectionBuilder().withUrl("/game").build();
+  private game: Game;
+  private connection: signalR.HubConnection;
   
   public gameStatus: GameStatus = GameStatus.None;
   public cards: Array<Card>;
@@ -61,23 +61,31 @@ export class GameService {
     return this.me.uuid == this.scrumMaster.uuid;
   }
 
-  public cardByIndex(index: number): Card {
+  cardByIndex(index: number): Card {
     return this.cards.filter(card => card.index == index)[0];
   }
 
+  validateGame(): Boolean {
+
+    return false;
+  }
+
   constructor(private router: Router) {
+    console.debug("in gameservice constructor");
+    this.connection = new signalR.HubConnectionBuilder().withUrl("/game").build();
     
-    this.connection.start().catch(err => console.log(err));
     this.connection.on("joined", message => this.onjoined(message));
+    this.connection.on("rejoined", message => this.onrejoined(message));
     this.connection.on("estimated", message => this.onestimated(message));
     this.connection.on("started", () => this.onstarted());
     this.connection.on("left", message => this.onleft(message));
-    this.connection.on("ended", () => this.onended());        
-
+    this.connection.on("ended", () => this.onended());
+    this.connection.on("disconnected", message => this.ondisconnected(message));
+    
     if (this.game != null)
       return;
 
-    var loadedGame: any = localStorage.getItem(this.gameKey);
+    let loadedGame: any = localStorage.getItem(this.gameKey);
     this.uuid = localStorage.getItem(this.uuidKey);
 
     if (loadedGame == null) {
@@ -99,12 +107,18 @@ export class GameService {
       this.uuid = uuid();
       localStorage.setItem(this.uuidKey, this.uuid);
     }
-    
+    console.debug("found my game");
   }
-  
+
+  async initConnection(): Promise<void>{
+    await this.connection.start()
+      .then(() => console.log("hub connected"))
+      .catch(err => console.log(err));
+  }
+
   join(request: JoinRequest): string {
 
-    var result: string = null;
+    let result: string = null;
     request.uuid = this.uuid;    
     this.connection.invoke<JoinResponse>("join", request)
       .then(response => {
@@ -118,7 +132,32 @@ export class GameService {
     
     return result;
   }
-    
+
+  rejoin(): string {    
+    console.debug("rejoin");    
+    let result: string = null;
+    let request = new JoinRequest();
+    request.teamName = this.game.teamName;
+    request.screenName = this.me.screenName;
+    request.uuid = this.uuid;
+    this.connection.invoke<JoinResponse>("rejoin", request)
+      .then(response => {
+        console.debug(response);
+        if (response.game != null) {
+          this.game = response.game;
+          this.cards = response.cards;
+          this.router.navigate(['/playfield']);
+          this.saveGame();
+        }
+        else {
+          result = "Game has been ended.";
+        }
+      })
+      .catch(error => { console.error(error); result = error.ToString; });
+
+    return result;
+  }
+
   create(request: CreateRequest): string {
 
     var result: string = null;
@@ -202,8 +241,17 @@ export class GameService {
 
   onjoined(message: Participant): void {
     console.debug("joined", message);
-    this.game.participants.push(message);
-    this.saveGame();
+    this.upsertParticipant(message);
+  }
+
+  ondisconnected(message: Participant): void {
+    console.debug("disconnected", message);
+    this.upsertParticipant(message);
+  }
+
+  onrejoined(message: Participant): void {
+    console.debug("rejoined", message);
+    this.upsertParticipant(message);
   }
 
   onleft(message: Participant): void {
@@ -213,8 +261,7 @@ export class GameService {
     this.game.participants.splice(index, 1);
     this.saveGame();
   }
-
-
+  
   onestimated(message: Estimation): void {
     console.debug("estimated", message);
     this.setEstimation(message);
@@ -258,6 +305,18 @@ export class GameService {
     this.participants.forEach(fe => {
       fe.waiting = false;
     });
+    this.saveGame();
+  }
+
+  upsertParticipant(participant: Participant) {
+    var theOne = this.game.participants.filter(f => f.uuid == participant.uuid)[0];
+    if (theOne == null) {
+      this.game.participants.push(participant);
+    }
+    else {
+      let index = this.game.participants.indexOf(theOne)
+      this.game.participants[index] = participant;
+    }
     this.saveGame();
   }
 
