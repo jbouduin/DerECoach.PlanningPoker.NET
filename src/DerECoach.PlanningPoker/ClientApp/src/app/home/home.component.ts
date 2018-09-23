@@ -17,14 +17,11 @@ export class HomeComponent implements AfterViewInit {
       if (this.gameService.isInGame) {
         let tryReenter = confirm("Do you want to rejoin the team '" + this.gameService.teamName + "'?");
         if (tryReenter == true) {
-          let message = this.gameService.rejoin();
-          if (message != null) {
-            alert(message);
-          }
+          this.gameService.rejoin();
         }
-        else {
-          this.gameService.leave();
-        }
+      }
+      else {
+        this.gameService.leave();
       }
     });
   }

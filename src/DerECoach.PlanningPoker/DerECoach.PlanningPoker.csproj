@@ -13,6 +13,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="DerECoach.Common.BaseTypes" Version="0.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="2.1.1" />
   </ItemGroup>
@@ -50,6 +51,7 @@
     <None Remove="ClientApp\src\app\core\requests\leave-request.ts" />
     <None Remove="ClientApp\src\app\core\responses\create-response.ts" />
     <None Remove="ClientApp\src\app\core\responses\join-response.ts" />
+    <None Remove="ClientApp\src\app\core\responses\result.ts" />
     <None Remove="ClientApp\src\app\core\services\game.service.ts" />
     <None Remove="ClientApp\src\app\game\playfield.component.ts" />
     <None Remove="ClientApp\src\app\home\create.component.ts" />
@@ -71,6 +73,7 @@
     <TypeScriptCompile Include="ClientApp\src\app\core\requests\leave-request.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\core\responses\create-response.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\core\responses\join-response.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\core\responses\result.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\core\services\game.service.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\game\playfield.component.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\home\create.component.ts" />

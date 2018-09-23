@@ -2,29 +2,32 @@
 using DerECoach.PlanningPoker.Core.Requests;
 using DerECoach.PlanningPoker.Core.Responses;
 using DerECoach.PlanningPoker.Core.Services;
+using DerECoach.Common.BaseTypes;
 using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Net;
 
 namespace DerECoach.PlanningPoker.Core.WebSockets
 {
     public class GameHub: Hub
     {
         #region game related --------------------------------------------------
-        public async Task<JoinResponse> Join(JoinRequest request)
+        public async Task<Result<HttpStatusCode, string, JoinResponse>> Join(JoinRequest request)
         {            
+            
             await Groups.AddToGroupAsync(Context.ConnectionId, request.TeamName);
-            var result = new JoinResponse();
+            var result =  new JoinResponse();
             result.Game = await GameService.GetInstance().JoinGameAsync(request, Context.ConnectionId);
             result.Cards = GetCards();
             var participant = await result.Game.GetParticipantByScreenNameAsync(request.ScreenName);
             await Clients.GroupExcept(request.TeamName, Context.ConnectionId).SendAsync("joined", participant);
             
-            return result;
+            return Result<HttpStatusCode, string, JoinResponse>.Success(result);
         }
 
-        public async Task<JoinResponse> Rejoin(JoinRequest request)
+        public async Task<Result<HttpStatusCode, string, JoinResponse>> Rejoin(JoinRequest request)
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, request.TeamName);
             var result = new JoinResponse();
@@ -32,44 +35,48 @@ namespace DerECoach.PlanningPoker.Core.WebSockets
             result.Cards = GetCards();
             var participant = await result.Game.GetParticipantByScreenNameAsync(request.ScreenName);
             await Clients.GroupExcept(request.TeamName, Context.ConnectionId).SendAsync("rejoined", participant);
-            return result;
+            return Result<HttpStatusCode, string, JoinResponse>.Success(result);
         }
 
-        public async Task<CreateResponse> Create(CreateRequest request)
+        public async Task<Result<HttpStatusCode, string, CreateResponse>> Create(CreateRequest request)
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, request.TeamName);
             var result = new CreateResponse();
             result.Game = await GameService.GetInstance().CreateGameAsync(request, Context.ConnectionId);
             result.Cards = GetCards();
-            return result;
+            return Result<HttpStatusCode, string, CreateResponse>.Success(result);
         }
 
-        public async Task Leave(LeaveRequest leaveRequest)
+        public async Task<Result<HttpStatusCode, string>> Leave(LeaveRequest leaveRequest)
         {
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, leaveRequest.TeamName);
             var participant = GameService.GetInstance().LeaveGame(leaveRequest);
             await Clients.Group(leaveRequest.TeamName).SendAsync("left", participant);
+            return Result<HttpStatusCode, string>.Success();
         }
 
-        public async Task Start(string teamName)
+        public async Task<Result<HttpStatusCode, string>> Start(string teamName)
         {
             await GameService.GetInstance().StartGameAsync(teamName);
             await Clients.GroupExcept(teamName, Context.ConnectionId).SendAsync("started");
+            return Result<HttpStatusCode, string>.Success();
         }
 
-        public async Task End(EndRequest request)
+        public async Task<Result<HttpStatusCode, string>> End(EndRequest request)
         {
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, request.TeamName);
             GameService.GetInstance().EndGame(request);
-            await Clients.Group(request.TeamName).SendAsync("ended");            
+            await Clients.Group(request.TeamName).SendAsync("ended");
+            return Result<HttpStatusCode, string>.Success();
         }
         #endregion
 
         #region estimations related -------------------------------------------
-        public async Task Estimate(EstimateRequest request)
+        public async Task<Result<HttpStatusCode, string>> Estimate(EstimateRequest request)
         {            
             var estimation = await GameService.GetInstance().EstimateAsync(request);            
             await Clients.GroupExcept(request.TeamName, Context.ConnectionId).SendAsync("estimated", estimation);
+            return Result<HttpStatusCode, string>.Success();
         }
         #endregion
 
