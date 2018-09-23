@@ -129,7 +129,7 @@ export class GameService {
   join(teamName: string, screenName: string): string {
 
     let result: string = null;
-    var request = new JoinRequest();
+    let request = new JoinRequest();
     request.screenName = screenName;
     request.teamName = teamName;
     request.uuid = this.uuid;    
@@ -201,7 +201,7 @@ export class GameService {
         var estimation = new Estimation();
         estimation.uuid = this.uuid;
         estimation.index = index;
-        this.setEstimation(estimation);
+        this.upsertEstimation(estimation);
       })
       .catch(error => { console.error(error);  });
   }
@@ -256,27 +256,25 @@ export class GameService {
 
   onjoined(message: Participant): void {
     console.debug("joined", message);
-    let toast: Toast = {
-      type: "info",
-      title: "Joined",
-      body: message.screenName + " joined"
-    }
-    this.toasterService.popAsync(toast)
+    this.infoToast("Joined", message.screenName + " joined");
     this.upsertParticipant(message);
   }
 
   ondisconnected(message: Participant): void {
     console.debug("disconnected", message);
+    this.infoToast("Disconnected", message.screenName + " disconnected");
     this.upsertParticipant(message);
   }
 
   onrejoined(message: Participant): void {
     console.debug("rejoined", message);
+    this.infoToast("Rejoined", message.screenName + " is back");
     this.upsertParticipant(message);
   }
 
   onleft(message: Participant): void {
     console.debug("left", message);
+    this.infoToast("Left", message.screenName + " has left the game");
     var theOne = this.game.participants.filter(f => f.uuid == message.uuid)[0];
     let index = this.game.participants.indexOf(theOne)
     this.game.participants.splice(index, 1);
@@ -285,7 +283,7 @@ export class GameService {
   
   onestimated(message: Estimation): void {
     console.debug("estimated", message);
-    this.setEstimation(message);
+    this.upsertEstimation(message);
   }
 
   onstarted(): void {
@@ -308,7 +306,7 @@ export class GameService {
     
   }
 
-  setEstimation(newEstimation: Estimation): void {
+  upsertEstimation(newEstimation: Estimation): void {
     var estimation = this.game.estimations.filter(f => f.uuid == newEstimation.uuid)[0];
     if (estimation == null) {
       this.game.estimations.push(newEstimation);
@@ -343,5 +341,14 @@ export class GameService {
 
   saveGame(): void {
     localStorage.setItem(this.gameKey, JSON.stringify(this.game));  
+  }
+
+  infoToast(titleText: string, message: string): void {
+    let toast: Toast = {
+      type: "info",
+      title: titleText,
+      body: message
+    }
+    this.toasterService.popAsync(toast)
   }
 }
