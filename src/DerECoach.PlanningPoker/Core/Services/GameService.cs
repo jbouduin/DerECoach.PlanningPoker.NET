@@ -42,16 +42,27 @@ namespace DerECoach.PlanningPoker.Core.Services
            });
         }
 
-        public Game JoinGame(JoinRequest request, string connectionId)
-        {
-            Game result = null;
+        public Result<HttpStatusCode, string, Game> JoinGame(JoinRequest request, string connectionId)
+        {            
             try
             {
                 //readerWriterLock.AcquireReaderLock(10000);
-                result = _games[request.TeamName];
-                result.AddParticipant(Participant.CreateParticipant(request.ScreenName, request.Uuid, connectionId));
+                if (!_games.ContainsKey(request.TeamName))
+                    return Result<HttpStatusCode, string, Game>
+                        .Failure(null, string.Format("No game named '{0}' exists", request.TeamName));
+
+                var game = _games[request.TeamName];
+                if (game.HasParticipantWithScreenName(request.ScreenName))
+                    return Result<HttpStatusCode, string, Game>
+                        .Failure(null, string.Format(
+                            "The game '{0}' already has a participant with name '{1}'", 
+                            request.TeamName, 
+                            request.ScreenName));
+                game.AddParticipant(
+                    Participant.CreateParticipant(request.ScreenName, request.Uuid, connectionId));
                 _connections.Add(connectionId, request.TeamName);
-                return result;
+
+                return Result<HttpStatusCode, string, Game>.Success(game);
             }
             finally
             {
@@ -60,7 +71,7 @@ namespace DerECoach.PlanningPoker.Core.Services
             
         }
 
-        public async Task<Game> JoinGameAsync(JoinRequest request, string connectionId)
+        public async Task<Result<HttpStatusCode, string,Game>> JoinGameAsync(JoinRequest request, string connectionId)
         {
             return await Task.Run(() =>
             {

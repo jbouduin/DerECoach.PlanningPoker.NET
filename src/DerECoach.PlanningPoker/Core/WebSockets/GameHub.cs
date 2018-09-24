@@ -15,16 +15,25 @@ namespace DerECoach.PlanningPoker.Core.WebSockets
     {
         #region game related --------------------------------------------------
         public async Task<Result<HttpStatusCode, string, JoinResponse>> Join(JoinRequest request)
-        {            
-            
+        {   
             await Groups.AddToGroupAsync(Context.ConnectionId, request.TeamName);
-            var result =  new JoinResponse();
-            result.Game = await GameService.GetInstance().JoinGameAsync(request, Context.ConnectionId);
-            result.Cards = GetCards();
-            var participant = await result.Game.GetParticipantByScreenNameAsync(request.ScreenName);
-            await Clients.GroupExcept(request.TeamName, Context.ConnectionId).SendAsync("joined", participant);
+            var result = await GameService.GetInstance().JoinGameAsync(request, Context.ConnectionId);
             
-            return Result<HttpStatusCode, string, JoinResponse>.Success(result);
+            var join = result.Return(
+                joinResult =>
+                {
+                    var response = new JoinResponse();
+                    response.Cards = GetCards();
+                    response.Game = joinResult.Value;                
+                    return response;
+                });
+
+            if (join.Succeeded)
+            {
+                var participant = await join.Value.Game.GetParticipantByScreenNameAsync(request.ScreenName);
+                await Clients.GroupExcept(request.TeamName, Context.ConnectionId).SendAsync("joined", participant);
+            }
+            return join;
         }
 
         public async Task<Result<HttpStatusCode, string, JoinResponse>> Rejoin(JoinRequest request)
