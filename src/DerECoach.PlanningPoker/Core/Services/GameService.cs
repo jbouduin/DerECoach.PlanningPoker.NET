@@ -1,6 +1,8 @@
-﻿using DerECoach.PlanningPoker.Core.Domain;
+﻿using DerECoach.Common.BaseTypes;
+using DerECoach.PlanningPoker.Core.Domain;
 using DerECoach.PlanningPoker.Core.Requests;
 using System.Collections.Generic;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace DerECoach.PlanningPoker.Core.Services
@@ -115,16 +117,21 @@ namespace DerECoach.PlanningPoker.Core.Services
             });
         }
 
-        public Game CreateGame(CreateRequest request, string connectionId)
-        {
-            var result = new Game(request.TeamName);
-            result.AddParticipant(Participant.CreateParticipant(request.ScrumMaster, request.Uuid, connectionId, true));
+        public Result<HttpStatusCode, string, Game> CreateGame(CreateRequest request, string connectionId)
+        {            
             try
             {
                 //readerWriterLock.AcquireWriterLock(READ_LOCK_TIMEOUT);
-                _games.Add(request.TeamName, result);
+                if (_games.ContainsKey(request.TeamName))
+                    return Result<HttpStatusCode, string, Game>
+                        .Failure(null, string.Format("A game named '{0}' already exists", request.TeamName));
+
+                var game = new Game(request.TeamName);
+                game.AddParticipant(Participant.CreateParticipant(request.ScrumMaster, request.Uuid, connectionId, true));
+                
+                _games.Add(request.TeamName, game);
                 _connections.Add(connectionId, request.TeamName);
-                return result;
+                return Result<HttpStatusCode, string, Game>.Success(game);
             }
             finally
             {
@@ -132,7 +139,7 @@ namespace DerECoach.PlanningPoker.Core.Services
             }
         }
 
-        public async Task<Game> CreateGameAsync(CreateRequest request, string connectionId)
+        public async Task<Result<HttpStatusCode, string, Game>> CreateGameAsync(CreateRequest request, string connectionId)
         {
             return await Task.Run(() =>
             {

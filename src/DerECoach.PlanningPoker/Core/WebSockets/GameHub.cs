@@ -1,13 +1,13 @@
-﻿using DerECoach.PlanningPoker.Core.Domain;
+﻿using DerECoach.Common.BaseTypes;
+using DerECoach.PlanningPoker.Core.Domain;
 using DerECoach.PlanningPoker.Core.Requests;
 using DerECoach.PlanningPoker.Core.Responses;
 using DerECoach.PlanningPoker.Core.Services;
-using DerECoach.Common.BaseTypes;
 using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace DerECoach.PlanningPoker.Core.WebSockets
 {
@@ -41,10 +41,16 @@ namespace DerECoach.PlanningPoker.Core.WebSockets
         public async Task<Result<HttpStatusCode, string, CreateResponse>> Create(CreateRequest request)
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, request.TeamName);
-            var result = new CreateResponse();
-            result.Game = await GameService.GetInstance().CreateGameAsync(request, Context.ConnectionId);
-            result.Cards = GetCards();
-            return Result<HttpStatusCode, string, CreateResponse>.Success(result);
+
+            var result = await GameService.GetInstance().CreateGameAsync(request, Context.ConnectionId);
+
+            return result.Return(gameResult =>
+            {
+                var response = new CreateResponse();
+                response.Cards = GetCards();
+                response.Game = gameResult.Value;
+                return response;
+            });
         }
 
         public async Task<Result<HttpStatusCode, string>> Leave(LeaveRequest leaveRequest)
