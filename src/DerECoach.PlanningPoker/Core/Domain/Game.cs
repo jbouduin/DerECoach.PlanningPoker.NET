@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using DerECoach.Common.BaseTypes;
+using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace DerECoach.PlanningPoker.Core.Domain
@@ -12,7 +14,7 @@ namespace DerECoach.PlanningPoker.Core.Domain
         #endregion
 
         #region private fields ------------------------------------------------        
-        private readonly AsyncReaderWriterLock _lock = new AsyncReaderWriterLock();
+        private readonly AsyncReaderWriterLock _lock = new AsyncReaderWriterLock();        
         #endregion
 
         #region public properties ---------------------------------------------
@@ -88,18 +90,18 @@ namespace DerECoach.PlanningPoker.Core.Domain
             });
         }
 
-        public Participant RemoveParticipant(string uuid)
+        public IValueResult<Participant> RemoveParticipant(IValueResultFactory valueResultFactory, string uuid)
         {
             var result = GetParticipant(uuid);
             Participants.Remove(result);
-            return result;
+            return valueResultFactory.Success(result);
         }
 
-        public async Task<Participant> RemoveParticipantAsync(string uuid)
+        public async Task<IValueResult<Participant>> RemoveParticipantAsync(IValueResultFactory valueResultFactory, string uuid)
         {
             return await Task.Run(() =>
             {
-                return RemoveParticipant(uuid);
+                return RemoveParticipant(valueResultFactory, uuid);
             });
         }
 

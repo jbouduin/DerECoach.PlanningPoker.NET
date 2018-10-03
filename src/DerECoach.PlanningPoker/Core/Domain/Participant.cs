@@ -1,10 +1,13 @@
 ﻿
+using DerECoach.Common.BaseTypes;
+using System.Net;
+
 namespace DerECoach.PlanningPoker.Core.Domain
 {
     public class Participant
     {
         #region private fields ------------------------------------------------ 
-        private string _connectionId;
+        private string _connectionId;        
         #endregion
 
         #region public properties ---------------------------------------------
@@ -16,9 +19,20 @@ namespace DerECoach.PlanningPoker.Core.Domain
         #endregion
 
         #region public methods ------------------------------------------------
-        public void Reconnect(string connectionId)
+        public IResult Reconnect(IResultFactory resultFactory, string connectionId)
         {
-            _connectionId = connectionId;
+            if (connectionId != null)
+            {
+                _connectionId = connectionId;
+                return resultFactory.Success();
+            }
+            else
+            {
+                return resultFactory
+                    .Failure(string.Format(
+                        "The participant with name '{0}' is already connected", 
+                        ScreenName));
+            }
         }
 
         public void Disconnect()
