@@ -1,6 +1,5 @@
 export class BaseResult {
-  message: string;
-  httpStatus: string;
+  message: string;  
   succeeded: boolean;
 }
 
