@@ -1,4 +1,5 @@
-﻿using DerECoach.PlanningPoker.Core.Domain;
+﻿using DerECoach.Common.BaseTypes;
+using DerECoach.PlanningPoker.Core.Domain;
 using DerECoach.PlanningPoker.Core.Requests;
 using DerECoach.PlanningPoker.Core.Responses;
 using DerECoach.PlanningPoker.Core.Services;
@@ -9,67 +10,158 @@ using System.Threading.Tasks;
 
 namespace DerECoach.PlanningPoker.Core.WebSockets
 {
-    public class GameHub: Hub
+    public class GameHub : Hub
     {
+        #region private fields ------------------------------------------------
+        private readonly IResultFactory _resultFactory = ResultFactoryProvider.GetResultFactory();
+        private readonly IValueResultFactory _valueResultFactory = ValueResultFactoryProvider.GetValueResultFactory();
+        #endregion
+
         #region game related --------------------------------------------------
-        public async Task<JoinResponse> Join(JoinRequest request)
-        {            
-            await Groups.AddToGroupAsync(Context.ConnectionId, request.TeamName);
-            var result = new JoinResponse();
-            result.Game = await GameService.GetInstance().JoinGameAsync(request, Context.ConnectionId);
-            result.Cards = GetCards();
-            var participant = await result.Game.GetParticipantByScreenNameAsync(request.ScreenName);
-            await Clients.GroupExcept(request.TeamName, Context.ConnectionId).SendAsync("joined", participant);
-            
-            return result;
+        public async Task<IValueResult<JoinResponse>> Join(JoinRequest request)
+        {
+            try
+            {
+                await Groups.AddToGroupAsync(Context.ConnectionId, request.TeamName);
+                var result = await GameService.GetInstance().JoinGameAsync(request, Context.ConnectionId);
+
+                var join = result
+                    .Convert(joinResult =>
+                    {
+                        var response = new JoinResponse
+                        {
+                            Cards = GetCards(),
+                            Game = joinResult.Value
+                        };
+                        return response;
+                    });
+
+                if (join.Succeeded)
+                {
+                    var participant = await join.Value.Game.GetParticipantByScreenNameAsync(request.ScreenName);
+                    await Clients.GroupExcept(request.TeamName, Context.ConnectionId).SendAsync("joined", participant);
+                }
+                return join;
+            }
+            catch
+            {
+                return _valueResultFactory.Failure<JoinResponse>(null, "Some error occurred on the server");
+            }
         }
 
-        public async Task<JoinResponse> Rejoin(JoinRequest request)
+        public async Task<IValueResult<JoinResponse>> Rejoin(JoinRequest request)
         {
-            await Groups.AddToGroupAsync(Context.ConnectionId, request.TeamName);
-            var result = new JoinResponse();
-            result.Game = await GameService.GetInstance().RejoinGameAsync(request, Context.ConnectionId);
-            result.Cards = GetCards();
-            var participant = await result.Game.GetParticipantByScreenNameAsync(request.ScreenName);
-            await Clients.GroupExcept(request.TeamName, Context.ConnectionId).SendAsync("rejoined", participant);
-            return result;
+            try
+            {
+                await Groups.AddToGroupAsync(Context.ConnectionId, request.TeamName);
+                var result = await GameService.GetInstance().RejoinGameAsync(request, Context.ConnectionId);
+
+                var join = result.Convert(
+                    joinResult =>
+                    {
+                        var response = new JoinResponse
+                        {
+                            Cards = GetCards(),
+                            Game = joinResult.Value
+                        };
+                        return response;
+                    });
+
+                if (join.Succeeded)
+                {
+                    var participant = await join.Value.Game.GetParticipantByScreenNameAsync(request.ScreenName);
+                    await Clients.GroupExcept(request.TeamName, Context.ConnectionId).SendAsync("rejoined", participant);
+                }
+                return join;
+            }
+            catch
+            {
+                return _valueResultFactory.Failure<JoinResponse>(null, "Some error occurred on the server");
+            }
         }
 
-        public async Task<CreateResponse> Create(CreateRequest request)
+        public async Task<IValueResult<CreateResponse>> Create(CreateRequest request)
         {
-            await Groups.AddToGroupAsync(Context.ConnectionId, request.TeamName);
-            var result = new CreateResponse();
-            result.Game = await GameService.GetInstance().CreateGameAsync(request, Context.ConnectionId);
-            result.Cards = GetCards();
-            return result;
+            try
+            {
+                await Groups.AddToGroupAsync(Context.ConnectionId, request.TeamName);
+
+                var result = await GameService.GetInstance().CreateGameAsync(request, Context.ConnectionId);
+
+                return result.Convert(gameResult =>
+                {
+                    var response = new CreateResponse
+                    {
+                        Cards = GetCards(),
+                        Game = gameResult.Value
+                    };
+                    return response;
+                });
+            }
+            catch
+            {
+                return _valueResultFactory.Failure<CreateResponse>(null, "Some error occurred on the server");
+            }
         }
 
-        public async Task Leave(LeaveRequest leaveRequest)
+        public async Task<IResult> Leave(LeaveRequest leaveRequest)
         {
-            await Groups.RemoveFromGroupAsync(Context.ConnectionId, leaveRequest.TeamName);
-            var participant = GameService.GetInstance().LeaveGame(leaveRequest);
-            await Clients.Group(leaveRequest.TeamName).SendAsync("left", participant);
+            try
+            {
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, leaveRequest.TeamName);
+                var participant = GameService.GetInstance().LeaveGame(leaveRequest, Context.ConnectionId);
+                await Clients.Group(leaveRequest.TeamName).SendAsync("left", participant);
+                return _resultFactory.Success();
+            }
+            catch
+            {
+                return _resultFactory.Failure("Some error occurred on the server");
+            }
         }
 
-        public async Task Start(string teamName)
+        public async Task<IResult> Start(string teamName)
         {
-            await GameService.GetInstance().StartGameAsync(teamName);
-            await Clients.GroupExcept(teamName, Context.ConnectionId).SendAsync("started");
+            try
+            {
+                await GameService.GetInstance().StartGameAsync(teamName);
+                await Clients.GroupExcept(teamName, Context.ConnectionId).SendAsync("started");
+                return _resultFactory.Success();
+            }
+            catch
+            {
+                return _resultFactory.Failure("Some error occurred on the server");
+            }
         }
 
-        public async Task End(EndRequest request)
+        public async Task<IResult> End(EndRequest request)
         {
-            await Groups.RemoveFromGroupAsync(Context.ConnectionId, request.TeamName);
-            GameService.GetInstance().EndGame(request);
-            await Clients.Group(request.TeamName).SendAsync("ended");            
+            try
+            {
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, request.TeamName);
+                GameService.GetInstance().EndGame(request);
+                await Clients.Group(request.TeamName).SendAsync("ended");
+                return _resultFactory.Success();
+            }
+            catch
+            {
+                return _resultFactory.Failure("Some error occurred on the server");
+            }
         }
         #endregion
 
         #region estimations related -------------------------------------------
-        public async Task Estimate(EstimateRequest request)
-        {            
-            var estimation = await GameService.GetInstance().EstimateAsync(request);            
-            await Clients.GroupExcept(request.TeamName, Context.ConnectionId).SendAsync("estimated", estimation);
+        public async Task<IResult> Estimate(EstimateRequest request)
+        {
+            try
+            {
+                var estimation = await GameService.GetInstance().EstimateAsync(request);
+                await Clients.GroupExcept(request.TeamName, Context.ConnectionId).SendAsync("estimated", estimation);
+                return _resultFactory.Success();
+            }
+            catch
+            {
+                return _resultFactory.Failure("Some error occurred on the server");
+            }
         }
         #endregion
 
@@ -77,14 +169,14 @@ namespace DerECoach.PlanningPoker.Core.WebSockets
         public override Task OnDisconnectedAsync(Exception exception)
         {
             return base.OnDisconnectedAsync(exception).ContinueWith((task) => ProcessOnDisconnected(Context.ConnectionId));
-            
+
         }
 
         #endregion
 
         #region helpers -------------------------------------------------------       
         private void ProcessOnDisconnected(string connectionId)
-        {            
+        {
             var team = GameService.GetInstance().GetTeamByConnectionId(connectionId);
             var participant = GameService.GetInstance().OnDisconnected(connectionId);
             Clients.GroupExcept(team, Context.ConnectionId).SendAsync("disconnected", participant);

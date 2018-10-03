@@ -15,16 +15,13 @@ export class HomeComponent implements AfterViewInit {
     console.debug("afterviewinit");
     this.gameService.initConnection().then(() => {
       if (this.gameService.isInGame) {
-        let tryReenter = confirm("Do you want to rejoin the team '" + this.gameService.teamName + "'?");
+        let tryReenter = confirm("Do you want to rejoin the team '" + this.gameService.teamName + "' as + '" + this.gameService.me.screenName + "'? ");
         if (tryReenter == true) {
-          let message = this.gameService.rejoin();
-          if (message != null) {
-            alert(message);
-          }
+          this.gameService.rejoin();
         }
-        else {
-          this.gameService.leave();
-        }
+      }
+      else {
+        this.gameService.leave();
       }
     });
   }

@@ -30,6 +30,6 @@ export class CreateComponent {
   }
 
   create(): void {
-    this.errorText = this.gameService.create(this.teamNameText, this.scrumMasterText);    
+    this.gameService.create(this.teamNameText, this.scrumMasterText);    
   }  
 }

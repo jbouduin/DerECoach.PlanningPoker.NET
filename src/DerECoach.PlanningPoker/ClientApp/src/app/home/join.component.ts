@@ -6,7 +6,6 @@ import { GameService } from '../core/services/game.service';
   templateUrl: './join.component.html'
 })
 export class JoinComponent {
-
   
   get teamNameLabel(): string {
     return "Team name";
@@ -29,6 +28,6 @@ export class JoinComponent {
   }
 
   join(): void {
-    this.errorText = this.gameService.join(this.teamNameText, this.screenNameText);
+    this.gameService.join(this.teamNameText, this.screenNameText);
   }
 }

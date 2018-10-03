@@ -4,6 +4,7 @@ import { v4 as uuid } from 'uuid';
 import { ToasterService, Toast } from 'angular2-toaster';
 
 import { Game } from '../domain/game';
+import { BaseResult, Result } from '../responses/result';
 import { Participant } from '../domain/participant';
 import { JoinRequest } from '../requests/join-request';
 import { CreateRequest } from '../requests/create-request';
@@ -116,142 +117,164 @@ export class GameService {
     await this.connection.start()
       .then(() => {
         console.log("hub connected");
-        let toast: Toast = {
-          type: "info",
-          title: "Connected",
-          body: "You are now connected"
-        }
-        this.toasterService.popAsync(toast)
+        this.infoToast("Connected", "You are now connected");
       })
-      .catch(err => console.log(err));
+      .catch(error => console.log(error));
   }
 
-  join(teamName: string, screenName: string): string {
-
-    let result: string = null;
+  join(teamName: string, screenName: string): void {        
     let request = new JoinRequest();
     request.screenName = screenName;
     request.teamName = teamName;
     request.uuid = this.uuid;    
-    this.connection.invoke<JoinResponse>("join", request)
+    this.connection.invoke<Result<JoinResponse>>("join", request)
       .then(response => {
         console.debug(response);
-        this.game = response.game;
-        this.cards = response.cards;
-        this.router.navigate(['/playfield']);
-        this.saveGame();
-      })
-      .catch(error => { console.error(error); result = error.ToString; });
-    
-    return result;
-  }
-
-  rejoin(): string {    
-    console.debug("rejoin");    
-    let result: string = null;
-    let request = new JoinRequest();
-    request.teamName = this.game.teamName;
-    request.screenName = this.me.screenName;
-    request.uuid = this.uuid;
-    this.connection.invoke<JoinResponse>("rejoin", request)
-      .then(response => {
-        console.debug(response);
-        if (response.game != null) {
-          this.game = response.game;
-          this.cards = response.cards;
+        if (response.succeeded == true) {
+          this.game = response.value.game;
+          this.cards = response.value.cards;
           this.router.navigate(['/playfield']);
           this.saveGame();
         }
         else {
-          result = "Game has been ended.";
+          this.errorToast("Error", response.message);
         }
       })
-      .catch(error => { console.error(error); result = error.ToString; });
-
-    return result;
+      .catch(error => {
+        console.error(error);
+        this.errorToast("Error", error);
+      });
   }
 
-  create(teamName: string, scrumMaster: string): string {
+  rejoin(): void {    
+    let request = new JoinRequest();
+    request.teamName = this.game.teamName;
+    request.screenName = this.me.screenName;
+    request.uuid = this.uuid;
+    this.connection.invoke<Result<JoinResponse>>("rejoin", request)
+      .then(response => {
+        console.debug(response);
+        if (response.succeeded == true) {
+          if (response.value.game != null) {
+            this.game = response.value.game;
+            this.cards = response.value.cards;
+            this.router.navigate(['/playfield']);
+            this.saveGame();
+          }
+          else {
+            this.errorToast("Error", "Unkown error");
+          }
+        }
+        else {
+          this.errorToast("Error", response.message);
+        }
+      })
+      .catch(error => {
+        console.error(error);
+        this.errorToast("Error", error);
+      });
+  }
 
-    let result: string = null;
+  create(teamName: string, scrumMaster: string): void {    
     let request = new CreateRequest();
     request.teamName = teamName;
     request.scrumMaster = scrumMaster;
     request.uuid = this.uuid;
-    this.connection.invoke<CreateResponse>("create", request)
+    this.connection.invoke<Result<CreateResponse>>("create", request)
       .then(response => {
         console.debug(response);
-        this.game = response.game;
-        this.cards = response.cards;
-        this.router.navigate(['/playfield']);
-        this.saveGame();
+        if (response.succeeded == true) {
+          this.game = response.value.game;
+          this.cards = response.value.cards;
+          this.router.navigate(['/playfield']);
+          this.saveGame();
+        }
+        else {
+          this.errorToast("Error", response.message);
+        }
       })
-      .catch(error => { console.error(error); result = error.ToString; });
-    return result;
+      .catch(error => {
+        console.error(error);
+        this.errorToast("Error", error);
+      });
   }
 
-  estimate(index: number) {
+  estimate(index: number): void {
     let request = new EstimateRequest();
     request.index = index;
     request.uuid = this.uuid;
     request.teamName = this.teamName;
     
-    this.connection.invoke("estimate", request)
-      .then(() => {
-        var estimation = new Estimation();
-        estimation.uuid = this.uuid;
-        estimation.index = index;
-        this.upsertEstimation(estimation);
+    this.connection.invoke<BaseResult>("estimate", request)
+      .then(response => {
+        if (response.succeeded) {
+          var estimation = new Estimation();
+          estimation.uuid = this.uuid;
+          estimation.index = index;
+          this.upsertEstimation(estimation);
+        }
+        else {
+          this.errorToast("Error", response.message);
+        }
       })
-      .catch(error => { console.error(error);  });
+      .catch(error => this.errorToast("Error", error));
   }
 
-  startGame() {
-    this.connection.invoke("start", this.teamName)
-      .then(() => {
-        this.startEstimating();
+  startGame(): void {
+    this.connection.invoke<BaseResult>("start", this.teamName)
+      .then(response => {
+        if (response.succeeded == true) {
+          this.startEstimating();
+        }
+        else {
+          this.errorToast("Error", response.message);
+        }
       })
-      .catch(error => { console.error(error); });    
+      .catch(error => this.errorToast("Error", error));    
   }
 
-  leave(): string {
-    let result: string = null;
+  leave(): void {    
     let request = new LeaveRequest();
     request.teamName = this.game.teamName;
     request.uuid = this.uuid;    
 
-    this.connection.invoke("leave", request)
-      .then(() => {        
-        this.game = null;
-        localStorage.removeItem(this.gameKey);
-        this.router.navigate(['']);
+    this.connection.invoke<BaseResult>("leave", request)
+      .then(response => {
+        if (response.succeeded) {
+          this.game = null;
+          localStorage.removeItem(this.gameKey);
+          this.router.navigate(['']);
+        }
+        else {
+          this.errorToast("Error", response.message);
+        }
       })
-      .catch(error => {
-        console.error(error);
-        result = error.ToString;
+      .catch(error => {        
+        this.errorToast("Error", error);
       });
-
-    return result;
   }
 
-  end(): string {
-    let result: string = null;
+  end(): void {
+    
     let request = new EndRequest();
     request.teamName = this.game.teamName;
     request.uuid = this.uuid;
 
-    this.connection.invoke("end", request)
-      .then(() => {
-        this.game = null;
-        localStorage.removeItem(this.gameKey);
-        this.router.navigate(['']);
+    this.connection.invoke<BaseResult>("end", request)
+      .then(response => {
+        if (response.succeeded) {
+          this.game = null;
+          localStorage.removeItem(this.gameKey);
+          this.router.navigate(['']);
+        }
+        else {
+          this.errorToast("Error", response.message);
+        }
       })
       .catch(error => {
         console.error(error);
-        result = error.ToString;
+        this.errorToast("Error", error);
       });
-
-    return result;
   }
 
   onjoined(message: Participant): void {
@@ -346,6 +369,15 @@ export class GameService {
   infoToast(titleText: string, message: string): void {
     let toast: Toast = {
       type: "info",
+      title: titleText,
+      body: message
+    }
+    this.toasterService.popAsync(toast)
+  }
+
+  errorToast(titleText: string, message: string): void {
+    let toast: Toast = {
+      type: "error",
       title: titleText,
       body: message
     }
